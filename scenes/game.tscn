@@ -1,0 +1,130 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.152941, 0.133333, 0.152941, 1 )
+
+[sub_resource type="Theme" id=3]
+Panel/styles/panel = SubResource( 2 )
+
+[sub_resource type="StyleBoxFlat" id=1]
+
+[node name="Game" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = SubResource( 3 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+margin_right = 720.0
+margin_bottom = 1280.0
+
+[node name="Header" type="Panel" parent="Panel/VBox"]
+margin_right = 720.0
+margin_bottom = 160.0
+rect_min_size = Vector2( 0, 160 )
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Panel/VBox/Header"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 16
+custom_constants/margin_top = 16
+custom_constants/margin_left = 16
+custom_constants/margin_bottom = 16
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Split" type="HSplitContainer" parent="Panel/VBox/Header/Margin"]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 704.0
+margin_bottom = 144.0
+dragger_visibility = 2
+
+[node name="TextureRect" type="TextureRect" parent="Panel/VBox/Header/Margin/Split"]
+margin_right = 64.0
+margin_bottom = 128.0
+texture = ExtResource( 1 )
+stretch_mode = 4
+
+[node name="HBox" type="HBoxContainer" parent="Panel/VBox/Header/Margin/Split"]
+margin_left = 64.0
+margin_right = 688.0
+margin_bottom = 128.0
+size_flags_horizontal = 3
+custom_constants/separation = 32
+alignment = 2
+
+[node name="Title" type="Label" parent="Panel/VBox/Header/Margin/Split/HBox"]
+margin_left = 435.0
+margin_top = 57.0
+margin_right = 528.0
+margin_bottom = 71.0
+text = "Anarchy Chess"
+
+[node name="Logo" type="TextureRect" parent="Panel/VBox/Header/Margin/Split/HBox"]
+margin_left = 560.0
+margin_right = 624.0
+margin_bottom = 128.0
+texture = ExtResource( 1 )
+stretch_mode = 6
+
+[node name="Margin" type="MarginContainer" parent="Panel/VBox"]
+margin_top = 164.0
+margin_right = 720.0
+margin_bottom = 1116.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_right = 8
+custom_constants/margin_top = 8
+custom_constants/margin_left = 8
+custom_constants/margin_bottom = 8
+
+[node name="AspectRatio" type="AspectRatioContainer" parent="Panel/VBox/Margin"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 712.0
+margin_bottom = 944.0
+
+[node name="ColorRect" type="ColorRect" parent="Panel/VBox/Margin/AspectRatio"]
+margin_top = 116.0
+margin_right = 704.0
+margin_bottom = 820.0
+
+[node name="Footer" type="Panel" parent="Panel/VBox"]
+margin_top = 1120.0
+margin_right = 720.0
+margin_bottom = 1280.0
+rect_min_size = Vector2( 0, 160 )
+
+[node name="HBox" type="HBoxContainer" parent="Panel/VBox/Footer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+alignment = 1
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="PauseButton" type="TextureButton" parent="Panel/VBox/Footer/HBox"]
+margin_left = 312.0
+margin_right = 408.0
+margin_bottom = 160.0
+rect_min_size = Vector2( 96, 48 )
+shortcut_in_tooltip = false
+texture_normal = ExtResource( 1 )
+texture_pressed = ExtResource( 1 )
+expand = true
+stretch_mode = 3
