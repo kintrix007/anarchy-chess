@@ -1,18 +1,16 @@
-using System;
-using System.Diagnostics;
-using AnarchyChess.scripts.pieces;
+using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Pieces;
 using Godot;
 using JetBrains.Annotations;
 
-namespace AnarchyChess.scripts
+namespace AnarchyChess.Scripts
 {
     [Signal]
     public delegate void PieceTaken(int x, int y, IPiece piece);
 
     public class BoardObj : Node
     {
-        [NotNull]
-        public Board Pieces = Board.StandardBoard();
+        [NotNull] public Board Pieces = BoardTemplates.Standard();
 
         public override void _Ready()
         {

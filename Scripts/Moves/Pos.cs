@@ -3,9 +3,9 @@ using System.Diagnostics.Contracts;
 using Godot;
 using Object = Godot.Object;
 
-namespace AnarchyChess.scripts
+namespace AnarchyChess.Scripts.Moves
 {
-    public class Pos : Object
+    public class Pos : Object, IEquatable<Pos>
     {
         public readonly int X;
         public readonly int Y;
@@ -24,6 +24,11 @@ namespace AnarchyChess.scripts
             Contract.Requires<ArgumentException>(pos.Substring(1).IsValidInteger());
         }
 
+        public Pos AddX(int x) => new Pos(this.X + x, Y);
+        public Pos AddY(int y) => new Pos(X, this.Y + y);
+        public Pos SetX(int x) => new Pos(x, this.Y);
+        public Pos SetY(int y) => new Pos(this.X, y);
+
         public static Pos operator+(Pos a, Pos b) => new Pos(a.X + b.X, a.Y + b.Y);
 
         public static Pos operator-(Pos a, Pos b) => a + -b;
@@ -36,6 +41,28 @@ namespace AnarchyChess.scripts
         {
             Contract.Requires<ArgumentException>('a' <= ch && ch <= 'h' || 'A' <= ch && ch <= 'H');
             return ch.ToString().ToLower()[0] - 'a';
+        }
+
+        public bool Equals(Pos other)
+        {
+            if (other is null) return false;
+            return X == other.X && Y == other.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Pos)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (X * 397) ^ Y;
+            }
         }
     }
 }
