@@ -5,6 +5,7 @@ using Godot;
 namespace AnarchyChess.Scripts.Pieces
 {
     public class Bishop : Object, IPiece
+    //We will now be describing the bisshop uwu
     {
         public int Cost => 3;
         public Side Side { get; }
