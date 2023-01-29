@@ -5,7 +5,7 @@
 ### Dependencies
 
 - [Godot Engine Mono Version](https://downloads.tuxfamily.org/godotengine/3.5.1/) (=3.5.1)
-- .NET SDK (>5.0)
+- [.NET SDK](https://dotnet.microsoft.com/en-us/download) (>5.0)
 - OpenJDK (=11)
 - Android SDK (>30.0.3)
 
