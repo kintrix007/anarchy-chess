@@ -7,4 +7,5 @@ export_presets.cfg
 .mono/
 data_*/
 
-
+# I don't think we need the .idea directory?
+.idea/
