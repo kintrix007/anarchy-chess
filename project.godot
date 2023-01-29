@@ -11,8 +11,8 @@ config_version=4
 [application]
 
 config/name="Anarchy Chess"
-config/description="A chess client - but with anarchy chess rules"
-run/main_scene="res://scenes/game.tscn"
+config/description="Play Anarchy Chess"
+run/main_scene="res://Scenes/Game.tscn"
 config/icon="res://icon.png"
 config/quit_on_go_back=false
 
