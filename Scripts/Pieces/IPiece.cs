@@ -10,6 +10,14 @@ namespace AnarchyChess.Scripts.Pieces
         Side Side { get; }
         int MoveCount { get; set; }
 
-        Move[] Moves([NotNull] Board board, [NotNull] Pos pos);
+        /// <summary>
+        /// Get the moves the piece can make. These still need to be validated.
+        /// </summary>
+        /// <param name="board">The board the game is played on</param>
+        /// <param name="pos">The current position of the piece</param>
+        /// <returns>The moves the piece can make</returns>
+        [NotNull]
+        [ItemNotNull]
+        Move[] GetMoves([NotNull] Board board, [NotNull] Pos pos);
     }
 }

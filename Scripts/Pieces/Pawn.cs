@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
+using JetBrains.Annotations;
 using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Pieces
@@ -17,40 +18,58 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public Move[] Moves(Boards.Board board, Pos pos)
+        public Move[] GetMoves(Boards.Board board, Pos pos)
         {
             var moves = new List<Move>();
-            int facing = (Side == Side.White ? 1 : -1);
-            moves.Add(Move.Relative(pos, new Pos(0, facing)));
-
-            if (MoveCount == 0)
-            {
-                moves.Add(Move.Relative(pos, new Pos(0, 2 * facing)));
-            }
-
-            moves.Add(Move.Relative(pos, new Pos(-1, facing)).Takes().Must());
-            moves.Add(Move.Relative(pos, new Pos(1, facing)).Takes().Must());
-            
+            moves.AddRange(NormalMove(board, pos));
             moves.AddRange(EnPassant(board, pos));
 
             return moves.ToArray();
         }
 
-        private IEnumerable<Move> EnPassant(Board board, Pos pos)
+        [NotNull]
+        [ItemNotNull]
+        public static IEnumerable<Move> NormalMove([NotNull] Board board, [NotNull] Pos pos)
+        {
+            var piece = board[pos];
+            var moves = new List<Move>();
+            int facing = (piece.Side == Side.White ? 1 : -1);
+            moves.Add(Move.MakeRelative(pos, new Pos(0, facing)));
+
+            if (piece.MoveCount == 0)
+            {
+                moves.Add(Move.MakeRelative(pos, new Pos(0, 2 * facing)));
+            }
+
+            moves.Add(Move.MakeRelative(pos, new Pos(-1, facing)).Must().Take());
+            moves.Add(Move.MakeRelative(pos, new Pos(1, facing)).Must().Take());
+
+            return moves;
+        }
+
+        /// Defined in a way that it works even if the pawn did not start at the pawn base line
+        [NotNull]
+        [ItemNotNull]
+        private IEnumerable<Move> EnPassant([NotNull] Board board, [NotNull] Pos pos)
         {
             var moves = new List<Move>();
-            int facing = (Side == Side.White ? 1 : -1);
             if (board.LastMove == null) return moves;
+            int facing = (Side == Side.White ? 1 : -1);
 
+            // We check both left and right
+            //TODO This looks horrendous, *please* make it into a method
             foreach (bool isLeft in new[] { true, false })
             {
                 int direction = isLeft ? -1 : 1;
                 var opponentPawnPos = pos.AddX(direction);
-                if (!(board[opponentPawnPos] is Pawn p && p.Side != Side)) continue;
+
+                if (!(board[opponentPawnPos] is Pawn p)) continue;
+                if (p.Side == Side) continue;
                 if (p.MoveCount != 1) continue;
                 if (!board.LastMove.To.Equals(opponentPawnPos)) continue;
-                
-                moves.Add(Move.Relative(pos, new Pos(direction, facing))
+                if (board.LastMove.Relative.Abs() != new Pos(0, 2)) continue;
+
+                moves.Add(Move.MakeRelative(pos, new Pos(direction, facing))
                               .AddTake(opponentPawnPos).Must());
             }
 

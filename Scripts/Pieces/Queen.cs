@@ -17,6 +17,6 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public Move[] Moves(Board board, Pos pos) => throw new System.NotImplementedException();
+        public Move[] GetMoves(Board board, Pos pos) => throw new System.NotImplementedException();
     }
 }
