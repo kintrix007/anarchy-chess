@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using JetBrains.Annotations;
 
@@ -100,6 +101,27 @@ namespace AnarchyChess.Scripts.Moves
         }
 
         /// <summary>
+        /// Get the inverse of a move. This reverses the order of the moves if there are follow-ups,
+        /// and flips around the movement direction.
+        /// </summary>
+        /// <returns>The inverse of the move</returns>
+        [NotNull]
+        public Move Inverse()
+        {
+            var moveList = Unfold().Select(InvertParams).Reverse().ToList();
+            var inverseMove = Fold(moveList);
+            return inverseMove;
+        }
+
+        private static Move InvertParams(Move move)
+        {
+            var inverse = new Move(move.To, move.From);
+            if (move.IsMustTake) inverse.Must();
+            move.TakeList.ForEach(x => inverse.AddTake(x));
+            return inverse;
+        }
+
+        /// <summary>
         /// Unfold the follow-up moves into a list for ease of use.
         /// </summary>
         /// <returns>The list of this move with its follow-up moves as well</returns>
@@ -117,6 +139,16 @@ namespace AnarchyChess.Scripts.Moves
             }
 
             return moves;
+        }
+
+        public static Move Fold(List<Move> moveList)
+        {
+            for (int i = 1; i < moveList.Count; i++)
+            {
+                moveList[i - 1].AddFollowUp(moveList[i]);
+            }
+
+            return moveList[0];
         }
 
         public override string ToString() => $"Move({From} -> {To})";
