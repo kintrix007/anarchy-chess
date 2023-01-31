@@ -8,6 +8,7 @@ using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Boards
 {
+    //TODO Make it iterable
     public class Board : Resource
     {
         [Signal]
@@ -52,19 +53,22 @@ namespace AnarchyChess.Scripts.Boards
             KingPositions[piece.Side] = pos;
         }
 
-        public void MovePiece(Move move)
+        /// <summary>
+        /// Does not modify anything except the piece positions.
+        /// </summary>
+        /// <param name="foldedMove"></param>
+        public void UncheckedMovePiece(Move foldedMove)
         {
-            var moves = move.Unfold();
+            var moveList = foldedMove.Unfold();
             var movingPieces = new Dictionary<Move, IPiece>();
-            moves.ForEach(x => movingPieces[x] = this[x.From]);
+            moveList.ForEach(move => movingPieces[move] = this[move.From]);
 
-            moves.ForEach(x => {
-                //TODO Add logic for taking pieces
+            moveList.ForEach(move => {
                 this[move.To] = movingPieces[move];
                 this[move.From] = null;
             });
 
-            LastMove = move;
+            LastMove = foldedMove;
         }
     }
 }
