@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
 using Godot;
@@ -19,7 +18,7 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public Move[] GetMoves(Board board, Pos pos)
+        Move[] IPiece.GetMoves(Board board, Pos pos)
         {
             var moves = new List<Move>();
             moves.AddRange(NormalMove(board, pos));
@@ -43,6 +42,7 @@ namespace AnarchyChess.Scripts.Pieces
             return moves;
         }
 
+        //TODO Make it check so that you cannot castle through a line of attack
         [NotNull]
         [ItemNotNull]
         public static IEnumerable<Move> Castling([NotNull] Board board, [NotNull] Pos pos)
@@ -57,12 +57,14 @@ namespace AnarchyChess.Scripts.Pieces
             return moves;
         }
 
+        //TODO rewrite it in a way that it does not matter where the castlable is.
+        //TODO It should just be unmoved and in the same row/column.
         private static IEnumerable<Move> _InternalCastle(bool isLeft, Board board, Pos pos)
         {
             int rookX = isLeft ? 0 : 7;
             int direction = isLeft ? -1 : 1;
-            var rook = board[pos.SetX(rookX)];
-            if (!(rook is Rook) || rook.MoveCount == 0) return new List<Move>();
+            var castlable = board[pos.SetX(rookX)];
+            if (!(castlable is ICastlable) || castlable.MoveCount == 0) return new List<Move>();
 
             for (int x = pos.X + direction; x != rookX; x += direction)
             {

@@ -4,7 +4,7 @@ using Godot;
 
 namespace AnarchyChess.Scripts.Pieces
 {
-    public class Rook : Object, IPiece
+    public class Rook : Object, IPiece, ICastlable
     {
         public int Cost => 5;
         public Side Side { get; }

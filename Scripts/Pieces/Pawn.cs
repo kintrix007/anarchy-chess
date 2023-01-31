@@ -6,7 +6,7 @@ using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Pieces
 {
-    public class Pawn : Object, IPiece
+    public class Pawn : Object, IPiece, IPromotable
     {
         public int Cost => 1;
         public Side Side { get; }
@@ -67,7 +67,7 @@ namespace AnarchyChess.Scripts.Pieces
                 if (p.Side == Side) continue;
                 if (p.MoveCount != 1) continue;
                 if (!board.LastMove.To.Equals(opponentPawnPos)) continue;
-                if (board.LastMove.Relative.Abs() != new Pos(0, 2)) continue;
+                if (!board.LastMove.Relative.Abs().Equals(new Pos(0, 2))) continue;
 
                 moves.Add(Move.MakeRelative(pos, new Pos(direction, facing))
                               .AddTake(opponentPawnPos).Must());
