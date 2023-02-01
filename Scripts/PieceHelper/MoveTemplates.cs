@@ -18,6 +18,7 @@ namespace AnarchyChess.Scripts.PieceHelper
                 var checkPiece = board[checkPos];
 
                 moves.Add(Move.Absolute(pos, checkPos));
+                if (!board.IsInBounds(checkPos)) break;
                 if (checkPiece != null) break;
             }
 

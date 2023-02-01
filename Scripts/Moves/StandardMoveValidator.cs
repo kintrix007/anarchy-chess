@@ -74,6 +74,8 @@ namespace AnarchyChess.Scripts.Moves
 
             foreach (var move in foldedMove.Unfold())
             {
+                if (!game.Board.IsInBounds(move.To)) continue;
+                
                 var gameClone = game.Clone();
                 gameClone.Board.InternalApplyMove(move);
                 

@@ -63,9 +63,12 @@ namespace AnarchyChess.Scripts.Boards
         /// Apply the move with its follow-ups on the board.
         /// </summary>
         /// <param name="foldedMove"></param>
+        /// <exception cref="ArgumentException"></exception>
         public void InternalApplyMove([NotNull] Move foldedMove)
         {
-            var moveList     = foldedMove.Unfold();
+            if (!IsInBounds(foldedMove.To)) throw new ArgumentException($"{foldedMove.To} is out of bounds");
+            
+            var moveList = foldedMove.Unfold();
             var movingPieces = new Dictionary<Move, IPiece>();
             moveList.ForEach(move => movingPieces[move] = this[move.From]);
 
