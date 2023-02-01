@@ -13,8 +13,8 @@ namespace AnarchyChess.Scripts.Boards
         [NotNull, ItemCanBeNull] private readonly IPiece[,] _pieces;
         
         //TODO Actually take these values into consideration after making them public.
-        private readonly int Width = 8;
-        private readonly int Height = 8;
+        private const int Width = 8;
+        private const int Height = 8;
 
         public Board()
         {
