@@ -59,7 +59,7 @@ namespace AnarchyChess.Scripts.Games
         {
             if (shouldValidate)
             {
-                var isValid = Validator.Validate(this, move);
+                var isValid = ValidateMove(move);
                 if (!isValid) return false;
             }
 
@@ -71,10 +71,14 @@ namespace AnarchyChess.Scripts.Games
                 .ToList();
 
             taken.ForEach(x => Scores[movingPiece.Side] += x.Cost);
-
+            movingPiece.MoveCount++;
+            MoveHistory.Add(move);
+            
             Board.InternalApplyMove(move);
             return true;
         }
+
+        public bool ValidateMove([NotNull] Move move) => Validator.Validate(this, move);
 
         /// <summary>
         /// As it stands currently, you should not assume a completely accurate clone.
