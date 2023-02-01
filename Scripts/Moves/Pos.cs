@@ -30,9 +30,9 @@ namespace AnarchyChess.Scripts.Moves
             Y = y;
         }
 
-        public Pos(char x, int y) : this(LetterToCoord(x), y) {}
+        public Pos(char x, int y) : this(LetterToCoord(x), y-1) {}
 
-        public Pos(string pos) : this(LetterToCoord(pos[0]), int.Parse(pos.Substring(1)))
+        public Pos(string pos) : this(pos[0], int.Parse(pos.Substring(1)))
         {
             if (pos.Length != 2) throw new ArgumentException();
             if (!pos.Substring(1).IsValidInteger()) throw new ArgumentException();
@@ -51,7 +51,7 @@ namespace AnarchyChess.Scripts.Moves
         private static int LetterToCoord(char ch)
         {
             if (!(('a' <= ch && ch <= 'h') || ('A' <= ch && ch <= 'H'))) throw new ArgumentException();
-            return ch.ToString().ToLower()[0] - 'a';
+            return char.ToLower(ch) - 'a';
         }
 
         public bool Equals(Pos other)

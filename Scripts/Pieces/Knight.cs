@@ -21,7 +21,10 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<Move> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
+        public IEnumerable<Move> GetMoves(Game game, Pos pos)
+        {
+            return NormalMove(game, pos);
+        }
 
         [NotNull, ItemNotNull]
         public static IEnumerable<Move> NormalMove([NotNull] Game board, [NotNull] Pos pos) =>

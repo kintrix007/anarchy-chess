@@ -2,12 +2,16 @@ using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Pieces;
+using Godot;
+using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts.Moves
 {
     public class StandardMoveValidator : IMoveValidator
     {
-        public bool Validate(Game game, Move foldedMove)
+        public bool Validate(Game game, Move foldedMove) => IsValidMove(game, foldedMove);
+
+        public static bool IsValidMove([NotNull] Game game, [NotNull] Move foldedMove)
         {
             if (!ValidateBounds(game, foldedMove)) return false;
             if (!ValidateOverlap(game, foldedMove)) return false;
@@ -63,32 +67,31 @@ namespace AnarchyChess.Scripts.Moves
 
             return true;
         }
-
+        
         public static bool ValidateNoCheck(Game game, Move foldedMove)
         {
             var originalPiece = game.Board[foldedMove.From];
 
             foreach (var move in foldedMove.Unfold())
             {
-                //? IDK man, this move then inverse move seems a bit finicky...
-                game.Board.InternalApplyMove(move);
-
+                var gameClone = game.Clone();
+                gameClone.Board.InternalApplyMove(move);
+                
                 for (var y = 0; y < 8; y++)
                 {
                     for (var x = 0; x < 8; x++)
                     {
                         var pos   = new Pos(x, y);
-                        var piece = game.Board[pos];
+                        var piece = gameClone.Board[pos];
                         if (piece == null) continue;
+                        if (piece.Side == originalPiece.Side) continue;
 
-                        var causesCheck = piece.GetMoves(game, pos)
-                            .Any(m => game.Board[m.To] is King k && k.Side == originalPiece.Side);
+                        var causesCheck = piece.GetMoves(gameClone, pos)
+                            .Any(m => gameClone.Board[m.To] is King k && k.Side == originalPiece.Side);
 
                         if (causesCheck) return false;
                     }
                 }
-
-                game.Board.InternalApplyMove(move.Inverse());
             }
 
             return true;
