@@ -37,7 +37,8 @@ namespace AnarchyChess.Scripts.Pieces
             var facing = piece.Side == Side.White ? 1 : -1;
             moves.Add(Move.Relative(pos, new Pos(0, facing)));
 
-            if (piece.MoveCount == 0)
+            // Can go two tiles if it hasn't moved and there is nothing in front of it.
+            if (piece.MoveCount == 0 && game.Board[pos.AddY(facing)] == null)
             {
                 moves.Add(Move.Relative(pos, new Pos(0, 2 * facing)));
             }
