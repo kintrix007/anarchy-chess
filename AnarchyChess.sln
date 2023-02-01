@@ -2,6 +2,8 @@
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnarchyChess", "AnarchyChess.csproj", "{ABA941AC-1F99-4D1B-930A-99C2C501CA1F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit", "NUnit\NUnit.csproj", "{7C27D2C0-591D-4A54-AFAF-105AC8BAECF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 	Debug|Any CPU = Debug|Any CPU
@@ -15,5 +17,11 @@ Global
 		{ABA941AC-1F99-4D1B-930A-99C2C501CA1F}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{ABA941AC-1F99-4D1B-930A-99C2C501CA1F}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{ABA941AC-1F99-4D1B-930A-99C2C501CA1F}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{7C27D2C0-591D-4A54-AFAF-105AC8BAECF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C27D2C0-591D-4A54-AFAF-105AC8BAECF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C27D2C0-591D-4A54-AFAF-105AC8BAECF4}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C27D2C0-591D-4A54-AFAF-105AC8BAECF4}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{7C27D2C0-591D-4A54-AFAF-105AC8BAECF4}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C27D2C0-591D-4A54-AFAF-105AC8BAECF4}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

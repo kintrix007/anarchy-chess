@@ -18,7 +18,7 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public Move[] GetMoves(Boards.Board board, Pos pos)
+        public Move[] GetMoves(Board board, Pos pos)
         {
             var moves = new List<Move>();
             moves.AddRange(NormalMove(board, pos));
@@ -50,28 +50,34 @@ namespace AnarchyChess.Scripts.Pieces
         /// Defined in a way that it works even if the pawn did not start at the pawn base line
         [NotNull]
         [ItemNotNull]
-        private IEnumerable<Move> EnPassant([NotNull] Board board, [NotNull] Pos pos)
+        public static IEnumerable<Move> EnPassant([NotNull] Board board, [NotNull] Pos pos)
         {
             var moves = new List<Move>();
             if (board.LastMove == null) return moves;
-            int facing = (Side == Side.White ? 1 : -1);
 
-            // We check both left and right
-            //TODO This looks horrendous, *please* make it into a method
-            foreach (bool isLeft in new[] { true, false })
-            {
-                int direction = isLeft ? -1 : 1;
-                var opponentPawnPos = pos.AddX(direction);
+            moves.AddRange(_InternalEnPassant(true, board, pos));
+            moves.AddRange(_InternalEnPassant(true, board, pos));
 
-                if (!(board[opponentPawnPos] is Pawn p)) continue;
-                if (p.Side == Side) continue;
-                if (p.MoveCount != 1) continue;
-                if (!board.LastMove.To.Equals(opponentPawnPos)) continue;
-                if (!board.LastMove.Relative.Abs().Equals(new Pos(0, 2))) continue;
+            return moves;
+        }
 
-                moves.Add(Move.MakeRelative(pos, new Pos(direction, facing))
-                              .AddTake(opponentPawnPos).Must());
-            }
+        private static IEnumerable<Move> _InternalEnPassant(bool isLeft, Board board, Pos pos)
+        {
+            var piece = board[pos];
+            int facing = (piece.Side == Side.White ? 1 : -1);
+            int direction = (isLeft ? -1 : 1);
+            var opponentPawnPos = pos.AddX(direction);
+            var moves = new List<Move>();
+
+            if (!(board[opponentPawnPos] is Pawn p)) return moves;
+            if (p.Side == piece.Side) return moves;
+            if (p.MoveCount != 1) return moves;
+            if (board.LastMove == null) return moves;
+            if (board.LastMove.To != opponentPawnPos) return moves;
+            if (board.LastMove.Relative.Abs() != new Pos(0, 2)) return moves;
+
+            moves.Add(Move.MakeRelative(pos, new Pos(direction, facing))
+                          .AddTake(opponentPawnPos).Must());
 
             return moves;
         }

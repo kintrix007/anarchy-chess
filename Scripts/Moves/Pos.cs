@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.Contracts;
 using Godot;
 using Object = Godot.Object;
 
@@ -35,8 +34,8 @@ namespace AnarchyChess.Scripts.Moves
 
         public Pos(string pos) : this(LetterToCoord(pos[0]), int.Parse(pos.Substring(1)))
         {
-            Contract.Requires<ArgumentException>(pos.Length == 2);
-            Contract.Requires<ArgumentException>(pos.Substring(1).IsValidInteger());
+            if (pos.Length != 2) throw new ArgumentException();
+            if (!pos.Substring(1).IsValidInteger()) throw new ArgumentException();
         }
 
         public static Pos operator+(Pos a, Pos b) => new Pos(a.X + b.X, a.Y + b.Y);
@@ -51,7 +50,7 @@ namespace AnarchyChess.Scripts.Moves
 
         private static int LetterToCoord(char ch)
         {
-            Contract.Requires<ArgumentException>('a' <= ch && ch <= 'h' || 'A' <= ch && ch <= 'H');
+            if (!('a' <= ch && ch <= 'h' || 'A' <= ch && ch <= 'H')) throw new ArgumentException();
             return ch.ToString().ToLower()[0] - 'a';
         }
 

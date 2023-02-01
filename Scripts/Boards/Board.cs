@@ -4,16 +4,12 @@ using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.Pieces;
 using Godot;
 using JetBrains.Annotations;
-using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Boards
 {
     //TODO Make it iterable
     public class Board : Resource
     {
-        [Signal]
-        public delegate void Taken([NotNull] Object piece, [NotNull] Pos at);
-
         [NotNull] public Dictionary<Side, Pos> KingPositions { get; private set; }
         [NotNull] public Dictionary<Side, int> Scores { get; private set; }
         [CanBeNull] public Move LastMove { get; private set; }

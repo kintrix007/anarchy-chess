@@ -10,8 +10,22 @@ namespace AnarchyChess.Scripts
     {
         public override void _Ready()
         {
-            GD.Print("Hello, World!");
-            GD.Print(Move.MakeRelative(new Pos(0, 0), new Pos(1, 2)));
+            var board = BoardTemplates.Standard();
+            var template = board.DumpTemplate();
+
+            var board2 = template.ParseBoard();
+
+            GD.Print(board2.DumpTemplate());
+            GD.Print(board.DumpTemplate() == board2.DumpTemplate());
+
+            GD.Print(board.DumpTemplate() == @"r n b q k b n r
+p p p p p p p p
+- - - - - - - -
+- - - - - - - -
+- - - - - - - -
+- - - - - - - -
+P P P P P P P P
+R N B Q K B N R");
         }
     }
 }
