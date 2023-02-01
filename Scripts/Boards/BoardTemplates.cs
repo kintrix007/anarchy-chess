@@ -1,4 +1,5 @@
 using AnarchyChess.Scripts.Moves;
+using AnarchyChess.Scripts.PieceHelper;
 using AnarchyChess.Scripts.Pieces;
 
 namespace AnarchyChess.Scripts.Boards

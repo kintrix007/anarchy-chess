@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
+using AnarchyChess.Scripts.PieceHelper;
+using Godot;
 using JetBrains.Annotations;
-using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Pieces
 {
@@ -18,7 +19,7 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public Move[] GetMoves(Board board, Pos pos)
+        public IEnumerable<Move> GetMoves(Board board, Pos pos)
         {
             var moves = new List<Move>();
             moves.AddRange(NormalMove(board, pos));
@@ -33,16 +34,16 @@ namespace AnarchyChess.Scripts.Pieces
         {
             var piece = board[pos];
             var moves = new List<Move>();
-            int facing = (piece.Side == Side.White ? 1 : -1);
-            moves.Add(Move.MakeRelative(pos, new Pos(0, facing)));
+            int facing = piece.Side == Side.White ? 1 : -1;
+            moves.Add(Move.Relative(pos, new Pos(0, facing)));
 
             if (piece.MoveCount == 0)
             {
-                moves.Add(Move.MakeRelative(pos, new Pos(0, 2 * facing)));
+                moves.Add(Move.Relative(pos, new Pos(0, 2 * facing)));
             }
 
-            moves.Add(Move.MakeRelative(pos, new Pos(-1, facing)).Must().Take());
-            moves.Add(Move.MakeRelative(pos, new Pos(1, facing)).Must().Take());
+            moves.Add(Move.Relative(pos, new Pos(-1, facing)).Must().Take());
+            moves.Add(Move.Relative(pos, new Pos(1, facing)).Must().Take());
 
             return moves;
         }
@@ -64,8 +65,8 @@ namespace AnarchyChess.Scripts.Pieces
         private static IEnumerable<Move> _InternalEnPassant(bool isLeft, Board board, Pos pos)
         {
             var piece = board[pos];
-            int facing = (piece.Side == Side.White ? 1 : -1);
-            int direction = (isLeft ? -1 : 1);
+            int facing = piece.Side == Side.White ? 1 : -1;
+            int direction = isLeft ? -1 : 1;
             var opponentPawnPos = pos.AddX(direction);
             var moves = new List<Move>();
 
@@ -74,9 +75,9 @@ namespace AnarchyChess.Scripts.Pieces
             if (p.MoveCount != 1) return moves;
             if (board.LastMove == null) return moves;
             if (board.LastMove.To != opponentPawnPos) return moves;
-            if (board.LastMove.Relative.Abs() != new Pos(0, 2)) return moves;
+            if (board.LastMove.AsRelative.Abs() != new Pos(0, 2)) return moves;
 
-            moves.Add(Move.MakeRelative(pos, new Pos(direction, facing))
+            moves.Add(Move.Relative(pos, new Pos(direction, facing))
                           .AddTake(opponentPawnPos).Must());
 
             return moves;

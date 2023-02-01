@@ -10,49 +10,59 @@ namespace AnarchyChess.Scripts.Moves
     /// </summary>
     public class Move : Resource
     {
+        /// <summary>
         /// The origin of the move.
+        /// </summary>
         [NotNull] public readonly Pos From;
 
+        /// <summary>
         /// The destination of the move.
+        /// </summary>
         [NotNull] public readonly Pos To;
 
-        ///The list of positions where the pieces will get taken by this move.
+        /// <summary>
+        /// The list of positions where the pieces will get taken by this move.
+        /// This means that ALL of the pieces on these positions will be captured by this move.
+        /// </summary>
         [NotNull] [ItemNotNull] public readonly List<Pos> TakeList;
 
-        /// Whether on not it is required that this move captures on all the positions of the take list.
-        /// For example for Il Vaticano this would be true.
+        /// <summary>
+        /// Whether on not it is required that this move captures on all the positions on the take list.
+        /// For example the Pawn's capturing move can only happen if it actually captures a piece.
+        /// </summary>
         public bool IsMustTake { get; private set; }
 
-        /// A move that has to happen after this move.
-        /// For example, for castling the rook's move would be a follow-up.
+        /// <summary>
+        /// The follow-up happens right after this move, and they can only happen together.
+        /// For example, for castling would be a move that has a follow-up.
+        /// The first move would be the king, and the follow-up would be the rook moving in the correct place.
+        /// </summary>
         [CanBeNull]
         public Move FollowUp { get; private set; }
 
-        /// Get the relative offset from the origin to the destination of the move.
-        public Pos Relative => To - From;
+        /// <summary>
+        /// Get the relative movement of this move.
+        /// This means how much it moves from the origin of the move.
+        /// </summary>
+        public Pos AsRelative => To - From;
 
         /// <summary>
-        /// Create a move with an origin and a destination.
+        /// Create a move based on the origin and the destination of the move.
         /// </summary>
         /// <param name="from">The origin of the move</param>
         /// <param name="to">The destination of the move</param>
-        public Move([NotNull] Pos from, [NotNull] Pos to)
-        {
-            From = from;
-            To = to;
-            TakeList = new List<Pos>();
-            IsMustTake = false;
-            FollowUp = null;
-        }
+        /// <returns></returns>
+        [NotNull]
+        public static Move Absolute([NotNull] Pos from, [NotNull] Pos to) => new Move(from, to);
 
         /// <summary>
-        /// Create a move based on the relative offset of the movement.
+        /// Create a move based on the origin and the offset of the move.
         /// </summary>
         /// <param name="from">The origin of the move</param>
         /// <param name="offset">The offset the piece should move by</param>
         /// <returns>The move</returns>
         [NotNull]
-        public static Move MakeRelative([NotNull] Pos from, [NotNull] Pos offset) => new Move(from, from + offset);
+        public static Move Relative([NotNull] Pos from, [NotNull] Pos offset) => new Move(from, from + offset);
 
         /// <summary>
         /// Set this move to also capture the piece at the destination.
@@ -113,14 +123,6 @@ namespace AnarchyChess.Scripts.Moves
             return inverseMove;
         }
 
-        private static Move InvertParams(Move move)
-        {
-            var inverse = new Move(move.To, move.From);
-            if (move.IsMustTake) inverse.Must();
-            move.TakeList.ForEach(x => inverse.AddTake(x));
-            return inverse;
-        }
-
         /// <summary>
         /// Unfold the follow-up moves into a list for ease of use.
         /// </summary>
@@ -141,6 +143,12 @@ namespace AnarchyChess.Scripts.Moves
             return moves;
         }
 
+        /// <summary>
+        /// Create a move with follow-ups from a list of moves.
+        /// The already existing follow-ups of these moves will be overridden.
+        /// </summary>
+        /// <param name="moveList">The list of moves</param>
+        /// <returns>A single move with the follow-ups</returns>
         public static Move Fold(List<Move> moveList)
         {
             for (int i = 1; i < moveList.Count; i++)
@@ -152,5 +160,26 @@ namespace AnarchyChess.Scripts.Moves
         }
 
         public override string ToString() => $"Move({From} -> {To})";
+
+        /* --- Protected --- */
+
+        protected Move([NotNull] Pos from, [NotNull] Pos to)
+        {
+            From = from;
+            To = to;
+            TakeList = new List<Pos>();
+            IsMustTake = false;
+            FollowUp = null;
+        }
+
+        /* --- Private --- */
+
+        private static Move InvertParams(Move move)
+        {
+            var inverse = new Move(move.To, move.From);
+            if (move.IsMustTake) inverse.Must();
+            move.TakeList.ForEach(x => inverse.AddTake(x));
+            return inverse;
+        }
     }
 }

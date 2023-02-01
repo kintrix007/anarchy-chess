@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using AnarchyChess.Scripts.Moves;
+using AnarchyChess.Scripts.PieceHelper;
 using AnarchyChess.Scripts.Pieces;
 
 namespace AnarchyChess.Scripts.Boards

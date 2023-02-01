@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
+using AnarchyChess.Scripts.PieceHelper;
 using Godot;
 using JetBrains.Annotations;
 
@@ -18,13 +19,13 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        Move[] IPiece.GetMoves(Board board, Pos pos)
+        IEnumerable<Move> IPiece.GetMoves(Board board, Pos pos)
         {
             var moves = new List<Move>();
             moves.AddRange(NormalMove(board, pos));
             moves.AddRange(Castling(board, pos));
 
-            return moves.ToArray();
+            return moves;
         }
 
         [NotNull]
@@ -36,7 +37,7 @@ namespace AnarchyChess.Scripts.Pieces
             for (int y = -1; y <= 1; y++)
             {
                 if (x == 0 && y == 0) continue;
-                moves.Add(Move.MakeRelative(pos, new Pos(x, y)).Take());
+                moves.Add(Move.Relative(pos, new Pos(x, y)).Take());
             }
 
             return moves;
@@ -72,8 +73,8 @@ namespace AnarchyChess.Scripts.Pieces
                 if (board[pos.SetX(x)] != null) return new List<Move>();
             }
 
-            var move = Move.MakeRelative(pos, new Pos(2 * direction, 0))
-                           .AddFollowUp(new Move(pos.SetX(rookX), pos.AddX(1 * -direction)));
+            var move = Move.Relative(pos, new Pos(2 * direction, 0))
+                           .AddFollowUp(Move.Absolute(pos.SetX(rookX), pos.AddX(1 * -direction)));
 
             return new List<Move> { move };
         }

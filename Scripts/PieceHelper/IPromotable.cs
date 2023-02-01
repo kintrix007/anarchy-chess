@@ -1,4 +1,4 @@
-namespace AnarchyChess.Scripts.Pieces
+namespace AnarchyChess.Scripts.PieceHelper
 {
     public interface IPromotable
     {

@@ -3,9 +3,9 @@ using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
 
-namespace AnarchyChess.Scripts.Pieces
+namespace AnarchyChess.Scripts.PieceHelper
 {
-    public class MoveTemplate
+    public static class MoveTemplates
     {
         public static IEnumerable<Move> RunLine(Board board, Pos pos, Pos dir)
         {
@@ -17,7 +17,7 @@ namespace AnarchyChess.Scripts.Pieces
                 checkPos += dir;
                 var checkPiece = board[checkPos];
 
-                moves.Add(new Move(pos, checkPos));
+                moves.Add(Move.Absolute(pos, checkPos));
                 if (checkPiece != null) break;
             }
 

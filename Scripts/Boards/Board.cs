@@ -1,18 +1,33 @@
 using System;
 using System.Collections.Generic;
 using AnarchyChess.Scripts.Moves;
+using AnarchyChess.Scripts.PieceHelper;
 using AnarchyChess.Scripts.Pieces;
-using Godot;
 using JetBrains.Annotations;
+using Resource = Godot.Resource;
 
 namespace AnarchyChess.Scripts.Boards
 {
     //TODO Make it iterable
     public class Board : Resource
     {
-        [NotNull] public Dictionary<Side, Pos> KingPositions { get; private set; }
-        [NotNull] public Dictionary<Side, int> Scores { get; private set; }
-        [CanBeNull] public Move LastMove { get; private set; }
+        /// <summary>
+        /// Currently unused. Might be removed in the future.
+        /// </summary>
+        [NotNull]
+        public Dictionary<Side, Pos> KingPositions { get; private set; }
+
+        /// <summary>
+        /// Track the scores of each player. Might be removed in the future.
+        /// </summary>
+        [NotNull]
+        public Dictionary<Side, int> Scores { get; private set; }
+
+        /// <summary>
+        /// Track what the last move was. Might be replaced with a move list that represents the game.
+        /// </summary>
+        [CanBeNull]
+        public Move LastMove { get; private set; }
 
         [NotNull] [ItemCanBeNull] private readonly IPiece[,] _pieces;
 
@@ -53,7 +68,7 @@ namespace AnarchyChess.Scripts.Boards
         /// Does not modify anything except the piece positions.
         /// </summary>
         /// <param name="foldedMove"></param>
-        public void UncheckedMovePiece(Move foldedMove)
+        public void UnvalidatedMovePiece(Move foldedMove)
         {
             var moveList = foldedMove.Unfold();
             var movingPieces = new Dictionary<Move, IPiece>();

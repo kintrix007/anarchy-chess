@@ -6,17 +6,17 @@ namespace AnarchyChess.Scripts.Moves
 {
     public class StandardMoveValidator : IMoveValidator
     {
-        public bool IsValid(Board board, Move move)
+        public bool IsValid(Board board, Moves.Move foldedMove)
         {
-            if (!ValidateBounds(board, move)) return false;
-            if (!ValidateOverlap(board, move)) return false;
-            if (!ValidateMustTake(board, move)) return false;
-            if (!ValidateNoCheck(board, move)) return false;
+            if (!ValidateBounds(board, foldedMove)) return false;
+            if (!ValidateOverlap(board, foldedMove)) return false;
+            if (!ValidateMustTake(board, foldedMove)) return false;
+            if (!ValidateNoCheck(board, foldedMove)) return false;
 
             return true;
         }
 
-        public static bool ValidateBounds(Board board, Move foldedMove)
+        public static bool ValidateBounds(Board board, Moves.Move foldedMove)
         {
             foreach (var move in foldedMove.Unfold())
             {
@@ -27,7 +27,7 @@ namespace AnarchyChess.Scripts.Moves
             return true;
         }
 
-        public static bool ValidateOverlap(Board board, Move foldedMove)
+        public static bool ValidateOverlap(Board board, Moves.Move foldedMove)
         {
             foreach (var move in foldedMove.Unfold())
             {
@@ -44,7 +44,7 @@ namespace AnarchyChess.Scripts.Moves
             return true;
         }
 
-        public static bool ValidateMustTake(Board board, Move foldedMove)
+        public static bool ValidateMustTake(Board board, Moves.Move foldedMove)
         {
             foreach (var move in foldedMove.Unfold())
             {
@@ -60,14 +60,14 @@ namespace AnarchyChess.Scripts.Moves
             return true;
         }
 
-        public static bool ValidateNoCheck(Board board, Move foldedMove)
+        public static bool ValidateNoCheck(Board board, Moves.Move foldedMove)
         {
             var originalPiece = board[foldedMove.From];
 
             foreach (var move in foldedMove.Unfold())
             {
                 //? IDK man, this move then inverse move seems a bit finicky...
-                board.UncheckedMovePiece(move);
+                board.UnvalidatedMovePiece(move);
 
                 for (int y = 0; y < 8; y++)
                 {
@@ -84,7 +84,7 @@ namespace AnarchyChess.Scripts.Moves
                     }
                 }
 
-                board.UncheckedMovePiece(move.Inverse());
+                board.UnvalidatedMovePiece(move.Inverse());
             }
 
             return true;

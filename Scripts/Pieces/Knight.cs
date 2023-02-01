@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
+using AnarchyChess.Scripts.PieceHelper;
 using Godot;
 using JetBrains.Annotations;
 
@@ -19,7 +20,7 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public Move[] GetMoves(Board board, Pos pos) => NormalMove(board, pos).ToArray();
+        public IEnumerable<Move> GetMoves(Board board, Pos pos) => NormalMove(board, pos);
 
         [NotNull]
         [ItemNotNull]
@@ -29,6 +30,6 @@ namespace AnarchyChess.Scripts.Pieces
                 new Pos(2, -1), new Pos(1, -2),
                 new Pos(-1, 2), new Pos(-2, 1),
                 new Pos(-2, -1), new Pos(-1, -2),
-            }.Select(x => Move.MakeRelative(pos, x).Take()).ToList();
+            }.Select(x => Move.Relative(pos, x).Take());
     }
 }

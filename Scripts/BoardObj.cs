@@ -1,8 +1,5 @@
 using AnarchyChess.Scripts.Boards;
-using AnarchyChess.Scripts.Moves;
-using AnarchyChess.Scripts.Pieces;
 using Godot;
-using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts
 {
@@ -11,7 +8,7 @@ namespace AnarchyChess.Scripts
         public override void _Ready()
         {
             var board = BoardTemplates.Standard();
-            var template = board.DumpTemplate();
+            string template = board.DumpTemplate();
 
             var board2 = template.ParseBoard();
 

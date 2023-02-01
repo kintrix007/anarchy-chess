@@ -1,8 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
+using AnarchyChess.Scripts.PieceHelper;
+using JetBrains.Annotations;
 using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Pieces
@@ -19,7 +20,11 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public Move[] GetMoves(Board board, Pos pos)
+        public IEnumerable<Move> GetMoves(Board board, Pos pos) => NormalMove(board, pos);
+
+        [NotNull]
+        [ItemNotNull]
+        public static IEnumerable<Move> NormalMove([NotNull] Board board, [NotNull] Pos pos)
         {
             var moves = new List<Move>();
 
@@ -30,10 +35,10 @@ namespace AnarchyChess.Scripts.Pieces
 
             foreach (var dir in directions)
             {
-                moves.AddRange(MoveTemplate.RunLine(board, pos, dir).Select(x => x.Take()));
+                moves.AddRange(MoveTemplates.RunLine(board, pos, dir).Select(x => x.Take()));
             }
 
-            return moves.ToArray();
+            return moves;
         }
     }
 }
