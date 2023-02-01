@@ -43,14 +43,14 @@ namespace AnarchyChess.Scripts.Moves
         public static Pos operator-(Pos a) => new Pos(-a.X, -a.Y);
 
         public Pos Abs() => new Pos(Math.Abs(X), Math.Abs(Y));
-        public Pos AddX(int x) => new Pos(this.X + x, Y);
-        public Pos AddY(int y) => new Pos(X, this.Y + y);
-        public Pos SetX(int x) => new Pos(x, this.Y);
-        public Pos SetY(int y) => new Pos(this.X, y);
+        public Pos AddX(int x) => new Pos(X + x, Y);
+        public Pos AddY(int y) => new Pos(X, Y + y);
+        public Pos SetX(int x) => new Pos(x, Y);
+        public Pos SetY(int y) => new Pos(X, y);
 
         private static int LetterToCoord(char ch)
         {
-            if (!('a' <= ch && ch <= 'h' || 'A' <= ch && ch <= 'H')) throw new ArgumentException();
+            if (!(('a' <= ch && ch <= 'h') || ('A' <= ch && ch <= 'H'))) throw new ArgumentException();
             return ch.ToString().ToLower()[0] - 'a';
         }
 

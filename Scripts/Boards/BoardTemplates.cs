@@ -18,7 +18,7 @@ namespace AnarchyChess.Scripts.Boards
             board.AddPiece(new Pos(5, 0), new Bishop(Side.White));
             board.AddPiece(new Pos(6, 0), new Knight(Side.White));
             board.AddPiece(new Pos(7, 0), new Rook(Side.White));
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 board.AddPiece(new Pos(i, 1), new Pawn(Side.White));
             }
@@ -31,7 +31,7 @@ namespace AnarchyChess.Scripts.Boards
             board.AddPiece(new Pos(5, 7), new Bishop(Side.Black));
             board.AddPiece(new Pos(6, 7), new Knight(Side.Black));
             board.AddPiece(new Pos(7, 7), new Rook(Side.Black));
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 board.AddPiece(new Pos(i, 6), new Pawn(Side.Black));
             }

@@ -24,7 +24,7 @@ namespace AnarchyChess.Scripts.Moves
         /// The list of positions where the pieces will get taken by this move.
         /// This means that ALL of the pieces on these positions will be captured by this move.
         /// </summary>
-        [NotNull] [ItemNotNull] public readonly List<Pos> TakeList;
+        [NotNull, ItemNotNull]  public readonly List<Pos> TakeList;
 
         /// <summary>
         /// Whether on not it is required that this move captures on all the positions on the take list.
@@ -118,7 +118,7 @@ namespace AnarchyChess.Scripts.Moves
         [NotNull]
         public Move Inverse()
         {
-            var moveList = Unfold().Select(InvertParams).Reverse().ToList();
+            var moveList    = Unfold().Select(InvertParams).Reverse().ToList();
             var inverseMove = Fold(moveList);
             return inverseMove;
         }
@@ -127,8 +127,7 @@ namespace AnarchyChess.Scripts.Moves
         /// Unfold the follow-up moves into a list for ease of use.
         /// </summary>
         /// <returns>The list of this move with its follow-up moves as well</returns>
-        [NotNull]
-        [ItemNotNull]
+        [NotNull, ItemNotNull]
         public List<Move> Unfold()
         {
             var moves = new List<Move>();
@@ -151,7 +150,7 @@ namespace AnarchyChess.Scripts.Moves
         /// <returns>A single move with the follow-ups</returns>
         public static Move Fold(List<Move> moveList)
         {
-            for (int i = 1; i < moveList.Count; i++)
+            for (var i = 1; i < moveList.Count; i++)
             {
                 moveList[i - 1].AddFollowUp(moveList[i]);
             }

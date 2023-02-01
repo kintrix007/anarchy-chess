@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using JetBrains.Annotations;
 
@@ -14,11 +14,10 @@ namespace AnarchyChess.Scripts.PieceHelper
         /// <summary>
         ///     Get the moves the piece can make. These still need to be validated.
         /// </summary>
-        /// <param name="board">The board the game is played on</param>
+        /// <param name="game">The game being played</param>
         /// <param name="pos">The current position of the piece</param>
         /// <returns>The moves the piece can make</returns>
-        [NotNull]
-        [ItemNotNull]
-        IEnumerable<Move> GetMoves([NotNull] Board board, [NotNull] Pos pos);
+        [NotNull, ItemNotNull]
+        IEnumerable<Move> GetMoves([NotNull] Game game, [NotNull] Pos pos);
     }
 }

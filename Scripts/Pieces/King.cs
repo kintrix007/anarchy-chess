@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using Godot;
@@ -19,62 +20,62 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        IEnumerable<Move> IPiece.GetMoves(Board board, Pos pos)
+        IEnumerable<Move> IPiece.GetMoves(Game game, Pos pos)
         {
             var moves = new List<Move>();
-            moves.AddRange(NormalMove(board, pos));
-            moves.AddRange(Castling(board, pos));
+            moves.AddRange(NormalMove(game, pos));
+            moves.AddRange(Castling(game, pos));
 
             return moves;
         }
 
-        [NotNull]
-        [ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Board board, [NotNull] Pos pos)
+        [NotNull, ItemNotNull]
+        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
             var moves = new List<Move>();
-            for (int x = -1; x <= 1; x++)
-            for (int y = -1; y <= 1; y++)
+            for (var x = -1; x <= 1; x++)
             {
-                if (x == 0 && y == 0) continue;
-                moves.Add(Move.Relative(pos, new Pos(x, y)).Take());
+                for (var y = -1; y <= 1; y++)
+                {
+                    if (x == 0 && y == 0) continue;
+                    moves.Add(Move.Relative(pos, new Pos(x, y)).Take());
+                }
             }
 
             return moves;
         }
 
         //TODO Make it check so that you cannot castle through a line of attack
-        [NotNull]
-        [ItemNotNull]
-        public static IEnumerable<Move> Castling([NotNull] Board board, [NotNull] Pos pos)
+        [NotNull, ItemNotNull]
+        public static IEnumerable<Move> Castling([NotNull] Game game, [NotNull] Pos pos)
         {
-            var piece = board[pos];
+            var piece = game.Board[pos];
             var moves = new List<Move>();
             if (piece.MoveCount >= 0) return moves;
 
-            moves.AddRange(_InternalCastle(true, board, pos));
-            moves.AddRange(_InternalCastle(false, board, pos));
+            moves.AddRange(_InternalCastle(true, game, pos));
+            moves.AddRange(_InternalCastle(false, game, pos));
 
             return moves;
         }
 
         //TODO rewrite it in a way that it does not matter where the castlable is.
         //TODO It should just be unmoved and in the same row/column.
-        private static IEnumerable<Move> _InternalCastle(bool isLeft, Board board, Pos pos)
+        private static IEnumerable<Move> _InternalCastle(bool isLeft, Game game, Pos pos)
         {
-            int rookX = isLeft ? 0 : 7;
-            int direction = isLeft ? -1 : 1;
-            var castlable = board[pos.SetX(rookX)];
+            var rookX     = isLeft ? 0 : 7;
+            var direction = isLeft ? -1 : 1;
+            var castlable = game.Board[pos.SetX(rookX)];
             if (!(castlable is ICastlable) || castlable.MoveCount == 0) return new List<Move>();
 
-            for (int x = pos.X + direction; x != rookX; x += direction)
+            for (var x = pos.X + direction; x != rookX; x += direction)
             {
                 // Do not add the move if there are any pieces between the rook and the king
-                if (board[pos.SetX(x)] != null) return new List<Move>();
+                if (game.Board[pos.SetX(x)] != null) return new List<Move>();
             }
 
             var move = Move.Relative(pos, new Pos(2 * direction, 0))
-                           .AddFollowUp(Move.Absolute(pos.SetX(rookX), pos.AddX(1 * -direction)));
+                .AddFollowUp(Move.Absolute(pos.SetX(rookX), pos.AddX(1 * -direction)));
 
             return new List<Move> { move };
         }

@@ -1,22 +1,23 @@
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Pieces;
 
 namespace AnarchyChess.Scripts.Moves
 {
     public class StandardMoveValidator : IMoveValidator
     {
-        public bool IsValid(Board board, Moves.Move foldedMove)
+        public bool Validate(Game game, Move foldedMove)
         {
-            if (!ValidateBounds(board, foldedMove)) return false;
-            if (!ValidateOverlap(board, foldedMove)) return false;
-            if (!ValidateMustTake(board, foldedMove)) return false;
-            if (!ValidateNoCheck(board, foldedMove)) return false;
+            if (!ValidateBounds(game, foldedMove)) return false;
+            if (!ValidateOverlap(game, foldedMove)) return false;
+            if (!ValidateMustTake(game, foldedMove)) return false;
+            if (!ValidateNoCheck(game, foldedMove)) return false;
 
             return true;
         }
 
-        public static bool ValidateBounds(Board board, Moves.Move foldedMove)
+        public static bool ValidateBounds(Game game, Move foldedMove)
         {
             foreach (var move in foldedMove.Unfold())
             {
@@ -27,14 +28,14 @@ namespace AnarchyChess.Scripts.Moves
             return true;
         }
 
-        public static bool ValidateOverlap(Board board, Moves.Move foldedMove)
+        public static bool ValidateOverlap(Game game, Move foldedMove)
         {
             foreach (var move in foldedMove.Unfold())
             {
-                var movingPiece = board[move.From];
+                var movingPiece = game.Board[move.From];
                 if (movingPiece == null) return false;
 
-                var destPiece = board[move.To];
+                var destPiece = game.Board[move.To];
                 if (destPiece == null) continue;
 
                 if (destPiece.Side == movingPiece.Side) return false;
@@ -44,47 +45,50 @@ namespace AnarchyChess.Scripts.Moves
             return true;
         }
 
-        public static bool ValidateMustTake(Board board, Moves.Move foldedMove)
+        public static bool ValidateMustTake(Game game, Move foldedMove)
         {
             foreach (var move in foldedMove.Unfold())
             {
                 if (!move.IsMustTake) continue;
 
-                var movingPiece = board[move.From];
+                var movingPiece = game.Board[move.From];
                 if (movingPiece == null) return false;
 
-                bool takesAll = move.TakeList.All(x => board[x] != null && board[x].Side != movingPiece.Side);
+                var takesAll = move.TakeList.All(
+                    x => game.Board[x] != null && game.Board[x].Side != movingPiece.Side
+                );
+
                 if (!takesAll) return false;
             }
 
             return true;
         }
 
-        public static bool ValidateNoCheck(Board board, Moves.Move foldedMove)
+        public static bool ValidateNoCheck(Game game, Move foldedMove)
         {
-            var originalPiece = board[foldedMove.From];
+            var originalPiece = game.Board[foldedMove.From];
 
             foreach (var move in foldedMove.Unfold())
             {
                 //? IDK man, this move then inverse move seems a bit finicky...
-                board.UnvalidatedMovePiece(move);
+                game.Board.InternalApplyMove(move);
 
-                for (int y = 0; y < 8; y++)
+                for (var y = 0; y < 8; y++)
                 {
-                    for (int x = 0; x < 8; x++)
+                    for (var x = 0; x < 8; x++)
                     {
-                        var pos = new Pos(x, y);
-                        var piece = board[pos];
+                        var pos   = new Pos(x, y);
+                        var piece = game.Board[pos];
                         if (piece == null) continue;
 
-                        bool causesCheck = piece.GetMoves(board, pos)
-                                                .Any(m => board[m.To] is King k && k.Side == originalPiece.Side);
+                        var causesCheck = piece.GetMoves(game, pos)
+                            .Any(m => game.Board[m.To] is King k && k.Side == originalPiece.Side);
 
                         if (causesCheck) return false;
                     }
                 }
 
-                board.UnvalidatedMovePiece(move.Inverse());
+                game.Board.InternalApplyMove(move.Inverse());
             }
 
             return true;

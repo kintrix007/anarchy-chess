@@ -1,4 +1,5 @@
 using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games;
 using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts.Moves
@@ -13,9 +14,9 @@ namespace AnarchyChess.Scripts.Moves
         /// - the piece is only allowed to step on an opposing piece if it captures on that position <br/>
         /// - the king does not end up in a check after the move <br/>
         /// </summary>
-        /// <param name="board">The board the game is played on</param>
+        /// <param name="game">The game being played</param>
         /// <param name="foldedMove">The move to validate</param>
         /// <returns>Whether the move is valid</returns>
-        bool IsValid([NotNull] Board board, [NotNull] Move foldedMove);
+        bool Validate([NotNull] Game game, [NotNull] Move foldedMove);
     }
 }

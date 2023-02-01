@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using Godot;
@@ -19,15 +20,14 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<Move> GetMoves(Board board, Pos pos) => NormalMove(board, pos);
+        public IEnumerable<Move> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
 
-        [NotNull]
-        [ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Board board, [NotNull] Pos pos)
+        [NotNull, ItemNotNull]
+        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
             var moves = new List<Move>();
-            moves.AddRange(Rook.NormalMove(board, pos));
-            moves.AddRange(Bishop.NormalMove(board, pos));
+            moves.AddRange(Rook.NormalMove(game, pos));
+            moves.AddRange(Bishop.NormalMove(game, pos));
 
             return moves;
         }

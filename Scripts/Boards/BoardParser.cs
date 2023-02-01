@@ -31,28 +31,28 @@ namespace AnarchyChess.Scripts.Boards
         //TODO PLEASE clean up this mess. I beg you.
         public static Board ParseBoard(this string template)
         {
-            string[] lines = template.Split('\n');
+            var lines = template.Split('\n');
             if (lines.Length != 8) throw new ArgumentException();
 
             var pieceStrings = lines.Select(
                 l => {
                     var pieces = l
-                                 .Split(' ', '\t')
-                                 .Where(s => s != "")
-                                 .Select(s => s[0])
-                                 .ToList();
+                        .Split(' ', '\t')
+                        .Where(s => s != "")
+                        .Select(s => s[0])
+                        .ToList();
 
                     if (pieces.Count != 8) throw new ArgumentException();
                     return pieces;
                 }).ToList();
 
             var board = new Board();
-            for (int y = 0; y < pieceStrings.Count; y++)
+            for (var y = 0; y < pieceStrings.Count; y++)
             {
-                for (int x = 0; x < pieceStrings[y].Count; x++)
+                for (var x = 0; x < pieceStrings[y].Count; x++)
                 {
-                    char ch = pieceStrings[pieceStrings.Count - y - 1][x];
-                    var pieceClass = SymbolToPiece[char.ToUpper(ch)];
+                    var ch         = pieceStrings[pieceStrings.Count - y - 1][x];
+                    var  pieceClass = SymbolToPiece[char.ToUpper(ch)];
                     if (pieceClass == null) continue;
 
                     var pieceConstructor = pieceClass.GetConstructor(new[] { typeof(Side) });
@@ -70,12 +70,12 @@ namespace AnarchyChess.Scripts.Boards
 
         public static string DumpTemplate(this Board board)
         {
-            string[][] pieceStrings = new string[8][];
+            var pieceStrings = new string[8][];
 
-            for (int y = 0; y < 8; y++)
+            for (var y = 0; y < 8; y++)
             {
                 pieceStrings[y] = new string[8];
-                for (int x = 0; x < 8; x++)
+                for (var x = 0; x < 8; x++)
                 {
                     var piece = board[new Pos(x, 7 - y)];
                     if (piece == null)
@@ -84,7 +84,7 @@ namespace AnarchyChess.Scripts.Boards
                         continue;
                     }
 
-                    string str = PieceToSymbol[piece.GetType()].ToString();
+                    var str = PieceToSymbol[piece.GetType()].ToString();
                     if (piece.Side == Side.Black) str = str.ToLower();
                     pieceStrings[y][x] = str;
                 }

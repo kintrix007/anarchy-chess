@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using Godot;
@@ -9,7 +10,7 @@ using JetBrains.Annotations;
 namespace AnarchyChess.Scripts.Pieces
 {
     public class Rook : Object, IPiece, ICastlable
-    { 
+    {
         public int Cost => 5;
         public Side Side { get; }
         public int MoveCount { get; set; }
@@ -19,12 +20,11 @@ namespace AnarchyChess.Scripts.Pieces
             Side = side;
             MoveCount = 0;
         }
-        
-        public IEnumerable<Move> GetMoves(Board board, Pos pos) => NormalMove(board, pos);
 
-        [NotNull]
-        [ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Board board, [NotNull] Pos pos)
+        public IEnumerable<Move> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
+
+        [NotNull, ItemNotNull]
+        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
             var moves = new List<Move>();
 
@@ -35,7 +35,7 @@ namespace AnarchyChess.Scripts.Pieces
 
             foreach (var dir in directions)
             {
-                moves.AddRange(MoveTemplates.RunLine(board, pos, dir).Select(x => x.Take()));
+                moves.AddRange(MoveTemplates.RunLine(game.Board, pos, dir).Select(x => x.Take()));
             }
 
             return moves;

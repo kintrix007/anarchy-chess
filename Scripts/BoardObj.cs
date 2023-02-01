@@ -7,8 +7,8 @@ namespace AnarchyChess.Scripts
     {
         public override void _Ready()
         {
-            var board = BoardTemplates.Standard();
-            string template = board.DumpTemplate();
+            var    board    = BoardTemplates.Standard();
+            var template = board.DumpTemplate();
 
             var board2 = template.ParseBoard();
 

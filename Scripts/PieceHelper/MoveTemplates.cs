@@ -9,10 +9,10 @@ namespace AnarchyChess.Scripts.PieceHelper
     {
         public static IEnumerable<Move> RunLine(Board board, Pos pos, Pos dir)
         {
-            var moves = new List<Move>();
+            var moves    = new List<Move>();
             var checkPos = pos;
 
-            foreach (int _ in Enumerable.Range(0, 8))
+            foreach (var _ in Enumerable.Range(0, 8))
             {
                 checkPos += dir;
                 var checkPiece = board[checkPos];

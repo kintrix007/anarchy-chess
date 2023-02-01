@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using Godot;
@@ -20,11 +21,10 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<Move> GetMoves(Board board, Pos pos) => NormalMove(board, pos);
+        public IEnumerable<Move> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
 
-        [NotNull]
-        [ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Board board, [NotNull] Pos pos) =>
+        [NotNull, ItemNotNull]
+        public static IEnumerable<Move> NormalMove([NotNull] Game board, [NotNull] Pos pos) =>
             new[] {
                 new Pos(1, 2), new Pos(2, 1),
                 new Pos(2, -1), new Pos(1, -2),

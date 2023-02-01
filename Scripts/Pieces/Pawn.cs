@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using Godot;
@@ -19,22 +20,21 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<Move> GetMoves(Board board, Pos pos)
+        public IEnumerable<Move> GetMoves(Game game, Pos pos)
         {
             var moves = new List<Move>();
-            moves.AddRange(NormalMove(board, pos));
-            moves.AddRange(EnPassant(board, pos));
+            moves.AddRange(NormalMove(game, pos));
+            moves.AddRange(EnPassant(game, pos));
 
             return moves.ToArray();
         }
 
-        [NotNull]
-        [ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Board board, [NotNull] Pos pos)
+        [NotNull, ItemNotNull]
+        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
-            var piece = board[pos];
-            var moves = new List<Move>();
-            int facing = piece.Side == Side.White ? 1 : -1;
+            var piece  = game.Board[pos];
+            var moves  = new List<Move>();
+            var facing = piece.Side == Side.White ? 1 : -1;
             moves.Add(Move.Relative(pos, new Pos(0, facing)));
 
             if (piece.MoveCount == 0)
@@ -49,36 +49,35 @@ namespace AnarchyChess.Scripts.Pieces
         }
 
         /// Defined in a way that it works even if the pawn did not start at the pawn base line
-        [NotNull]
-        [ItemNotNull]
-        public static IEnumerable<Move> EnPassant([NotNull] Board board, [NotNull] Pos pos)
+        [NotNull, ItemNotNull]
+        public static IEnumerable<Move> EnPassant([NotNull] Game game, [NotNull] Pos pos)
         {
             var moves = new List<Move>();
-            if (board.LastMove == null) return moves;
+            if (game.LastMove == null) return moves;
 
-            moves.AddRange(_InternalEnPassant(true, board, pos));
-            moves.AddRange(_InternalEnPassant(true, board, pos));
+            moves.AddRange(_InternalEnPassant(true, game, pos));
+            moves.AddRange(_InternalEnPassant(true, game, pos));
 
             return moves;
         }
 
-        private static IEnumerable<Move> _InternalEnPassant(bool isLeft, Board board, Pos pos)
+        private static IEnumerable<Move> _InternalEnPassant(bool isLeft, Game game, Pos pos)
         {
-            var piece = board[pos];
-            int facing = piece.Side == Side.White ? 1 : -1;
-            int direction = isLeft ? -1 : 1;
+            var piece           = game.Board[pos];
+            var facing          = piece.Side == Side.White ? 1 : -1;
+            var direction       = isLeft ? -1 : 1;
             var opponentPawnPos = pos.AddX(direction);
-            var moves = new List<Move>();
+            var moves           = new List<Move>();
 
-            if (!(board[opponentPawnPos] is Pawn p)) return moves;
+            if (!(game.Board[opponentPawnPos] is Pawn p)) return moves;
             if (p.Side == piece.Side) return moves;
             if (p.MoveCount != 1) return moves;
-            if (board.LastMove == null) return moves;
-            if (board.LastMove.To != opponentPawnPos) return moves;
-            if (board.LastMove.AsRelative.Abs() != new Pos(0, 2)) return moves;
+            if (game.LastMove == null) return moves;
+            if (game.LastMove.To != opponentPawnPos) return moves;
+            if (game.LastMove.AsRelative.Abs() != new Pos(0, 2)) return moves;
 
             moves.Add(Move.Relative(pos, new Pos(direction, facing))
-                          .AddTake(opponentPawnPos).Must());
+                .AddTake(opponentPawnPos).Must());
 
             return moves;
         }
