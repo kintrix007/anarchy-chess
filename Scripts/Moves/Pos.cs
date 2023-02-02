@@ -41,6 +41,8 @@ namespace AnarchyChess.Scripts.Moves
         public static Pos operator+(Pos a, Pos b) => new Pos(a.X + b.X, a.Y + b.Y);
         public static Pos operator-(Pos a, Pos b) => a + -b;
         public static Pos operator-(Pos a) => new Pos(-a.X, -a.Y);
+        public static bool operator==(Pos a, Pos b) => a?.Equals(b) ?? false;
+        public static bool operator!=(Pos a, Pos b) => !(a == b);
 
         public Pos Abs() => new Pos(Math.Abs(X), Math.Abs(Y));
         public Pos AddX(int x) => new Pos(X + x, Y);
@@ -54,6 +56,14 @@ namespace AnarchyChess.Scripts.Moves
             return char.ToLower(ch) - 'a';
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Pos)obj);
+        }
+        
         public bool Equals(Pos other)
         {
             if (other is null) return false;
