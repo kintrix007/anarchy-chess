@@ -11,7 +11,7 @@ namespace AnarchyChess.Scripts.Boards
     public class Board : Resource
     {
         [NotNull, ItemCanBeNull] private readonly IPiece[,] _pieces;
-        
+
         //TODO Actually take these values into consideration after making them public.
         private const int Width = 8;
         private const int Height = 8;
@@ -67,7 +67,7 @@ namespace AnarchyChess.Scripts.Boards
         public void InternalApplyMove([NotNull] Move foldedMove)
         {
             if (!IsInBounds(foldedMove.To)) throw new ArgumentException($"{foldedMove.To} is out of bounds");
-            
+
             var moveList = foldedMove.Unfold();
             var movingPieces = new Dictionary<Move, IPiece>();
             moveList.ForEach(move => movingPieces[move] = this[move.From]);
@@ -92,13 +92,13 @@ namespace AnarchyChess.Scripts.Boards
                 {
                     var piece = this[new Pos(x, y)];
                     if (piece == null) continue;
-                    
+
                     var pieceCtor = piece.GetType().GetConstructor(new[] { typeof(Side) });
                     if (pieceCtor == null) throw new NullReferenceException();
-                    
+
                     var pieceClone = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
                     pieceClone.MoveCount = piece.MoveCount;
-                    
+
                     boardClone[new Pos(x, y)] = pieceClone;
                 }
             }

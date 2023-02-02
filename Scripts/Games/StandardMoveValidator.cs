@@ -1,11 +1,9 @@
 using System.Linq;
-using AnarchyChess.Scripts.Boards;
-using AnarchyChess.Scripts.Games;
+using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.Pieces;
-using Godot;
 using JetBrains.Annotations;
 
-namespace AnarchyChess.Scripts.Moves
+namespace AnarchyChess.Scripts.Games
 {
     public class StandardMoveValidator : IMoveValidator
     {
@@ -67,16 +65,16 @@ namespace AnarchyChess.Scripts.Moves
 
             return true;
         }
-        
+
         public static bool ValidateNoCheck(Game game, Move foldedMove)
         {
             var originalPiece = game.Board[foldedMove.From];
             var gameClone = game.Clone();
-            
+
             foreach (var move in foldedMove.Unfold().Where(move => game.Board.IsInBounds(move.To)))
             {
                 gameClone.Board.InternalApplyMove(move);
-                
+
                 for (var y = 0; y < 8; y++)
                 {
                     for (var x = 0; x < 8; x++)

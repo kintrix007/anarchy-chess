@@ -1,8 +1,7 @@
-using AnarchyChess.Scripts.Boards;
-using AnarchyChess.Scripts.Games;
+using AnarchyChess.Scripts.Moves;
 using JetBrains.Annotations;
 
-namespace AnarchyChess.Scripts.Moves
+namespace AnarchyChess.Scripts.Games
 {
     public interface IMoveValidator
     {

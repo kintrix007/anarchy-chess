@@ -73,7 +73,7 @@ namespace AnarchyChess.Scripts.Games
             taken.ForEach(x => Scores[movingPiece.Side] += x.Cost);
             movingPiece.MoveCount++;
             MoveHistory.Add(move);
-            
+
             Board.InternalApplyMove(move);
             return true;
         }
@@ -95,7 +95,7 @@ namespace AnarchyChess.Scripts.Games
             gameClone.MoveHistory = MoveHistory.ToList();
             gameClone.Scores[Side.White] = Scores[Side.White];
             gameClone.Scores[Side.Black] = Scores[Side.Black];
-            
+
             return gameClone;
         }
     }

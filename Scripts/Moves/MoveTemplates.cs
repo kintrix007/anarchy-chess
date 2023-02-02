@@ -19,7 +19,7 @@ namespace AnarchyChess.Scripts.PieceHelper
             {
                 checkPos += dir;
                 if (!board.IsInBounds(checkPos)) break;
-                
+
                 var checkPiece = board[checkPos];
                 moves.Add(Move.Absolute(pos, checkPos));
                 if (checkPiece != null) break;
@@ -38,16 +38,16 @@ namespace AnarchyChess.Scripts.PieceHelper
 
             var dir = new Pos(Math.Sign(by.X), Math.Sign(by.Y));
             var checkPos = pos;
-            while (checkPos != pos+by)
+            while (checkPos != pos + by)
             {
                 checkPos += dir;
                 if (!board.IsInBounds(checkPos)) return new List<Move>();
-                
+
                 var checkPiece = board[checkPos];
                 if (checkPiece != null) return new List<Move>();
             }
 
-            return new List<Move>{ Move.Relative(pos, by) };
+            return new List<Move> { Move.Relative(pos, by) };
         }
     }
 }

@@ -53,12 +53,12 @@ R - - - K - - R
             {
                 var move = GetRandomMove(game, i % 2 == 0 ? Side.White : Side.Black);
                 game.ApplyMove(move);
-                
+
                 GD.Print(game.Board.DumpTemplate());
                 GD.Print($"{game.Scores[Side.White]} ------ {game.Scores[Side.Black]}");
             }
         }
-        
+
         private static Move GetRandomMove(Game game, Side side)
         {
             var rnd = new Random();
@@ -69,18 +69,18 @@ R - - - K - - R
                 var piece = game.Board[pos];
                 if (piece == null) continue;
                 if (piece.Side != side) continue;
-                
+
                 var moves = piece.GetMoves(game, pos).Where(game.ValidateMove).ToList();
                 if (moves.Count == 0) continue;
                 return moves[rnd.Next(moves.Count)];
             }
         }
-        
+
         private static void OtherThingIGuess()
         {
             var board = BoardTemplates.Standard();
             var game = new Game(board);
-            
+
             GD.Print(game.Board.DumpTemplate());
 
             var horseyPos = new Pos("A1");
@@ -90,7 +90,7 @@ R - - - K - - R
             var allHorseyMoves = horsey.GetMoves(game, horseyPos).ToList();
             GD.Print(string.Join(", ", allHorseyMoves.Select(x => x.ToString())));
             var firstMove = allHorseyMoves[0];
-            
+
             GD.Print(firstMove);
             GD.Print(StandardMoveValidator.ValidateBounds(game, firstMove));
             GD.Print(StandardMoveValidator.ValidateOverlap(game, firstMove));
@@ -98,7 +98,7 @@ R - - - K - - R
             GD.Print(StandardMoveValidator.ValidateNoCheck(game, firstMove));
 
             GD.Print(game.Board.DumpTemplate());
-            
+
             var validHorseyMoves = allHorseyMoves.Where(x => StandardMoveValidator.IsValidMove(game, x)).ToList();
             GD.Print(string.Join(", ", validHorseyMoves.Select(x => x.ToString())));
 
@@ -109,10 +109,10 @@ R - - - K - - R
                 var ok = game.ApplyMove(firstValidMove);
                 GD.Print(ok);
             }
-            
+
             GD.Print(game.Board.DumpTemplate());
         }
-        
+
         private static void ReallyDontKnow()
         {
             var board1 = BoardTemplates.Standard();

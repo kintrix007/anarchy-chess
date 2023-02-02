@@ -30,7 +30,7 @@ namespace AnarchyChess.Scripts.Moves
             Y = y;
         }
 
-        public Pos(char x, int y) : this(LetterToCoord(x), y-1) {}
+        public Pos(char x, int y) : this(LetterToCoord(x), y - 1) {}
 
         public Pos(string pos) : this(pos[0], int.Parse(pos.Substring(1)))
         {
@@ -63,7 +63,7 @@ namespace AnarchyChess.Scripts.Moves
             if (obj.GetType() != this.GetType()) return false;
             return Equals((Pos)obj);
         }
-        
+
         public bool Equals(Pos other)
         {
             if (other is null) return false;
