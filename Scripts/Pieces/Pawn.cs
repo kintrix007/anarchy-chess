@@ -57,18 +57,18 @@ namespace AnarchyChess.Scripts.Pieces
             if (game.LastMove == null) return moves;
 
             moves.AddRange(_InternalEnPassant(true, game, pos));
-            moves.AddRange(_InternalEnPassant(true, game, pos));
+            moves.AddRange(_InternalEnPassant(false, game, pos));
 
             return moves;
         }
 
         private static IEnumerable<Move> _InternalEnPassant(bool isLeft, Game game, Pos pos)
         {
-            var piece           = game.Board[pos];
-            var facing          = piece.Side == Side.White ? 1 : -1;
-            var direction       = isLeft ? -1 : 1;
+            var piece = game.Board[pos];
+            var facing = piece.Side == Side.White ? 1 : -1;
+            var direction = isLeft ? -1 : 1;
             var opponentPawnPos = pos.AddX(direction);
-            var moves           = new List<Move>();
+            var moves = new List<Move>();
 
             if (!(game.Board[opponentPawnPos] is Pawn p)) return moves;
             if (p.Side == piece.Side) return moves;
