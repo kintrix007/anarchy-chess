@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using JetBrains.Annotations;
@@ -10,8 +12,7 @@ namespace AnarchyChess.Scripts.Boards
     /// <summary>
     /// Object to hold all the pieces.
     /// </summary>
-    //TODO Make it iterable
-    public class Board : Resource
+    public class Board : Resource, IEnumerable<(Pos pos, IPiece piece)>
     {
         [NotNull, ItemCanBeNull] private readonly IPiece[,] _pieces;
 
@@ -113,5 +114,21 @@ namespace AnarchyChess.Scripts.Boards
 
             return boardClone;
         }
+
+        public IEnumerator<(Pos, IPiece)> GetEnumerator()
+        {
+            for (var y = 0; y < Height; y++)
+            {
+                for (var x = 0; x < Width; x++)
+                {
+                    var pos = new Pos(x, y);
+                    var piece = this[pos];
+                    if (piece == null) continue;
+                    yield return (pos, piece);
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
