@@ -33,7 +33,7 @@ namespace AnarchyChess.Scripts.PieceHelper
         {
             if (by.X == 0 || by.Y == 0 || Math.Abs(by.X) == Math.Abs(by.Y))
             {
-                throw new ArgumentException("Only supports horizontal, vertical moves 45 degree diagonal moves");
+                throw new ArgumentException("Only supports horizontal, vertical and 45 degree diagonal moves");
             }
 
             var dir = new Pos(Math.Sign(by.X), Math.Sign(by.Y));
