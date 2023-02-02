@@ -51,8 +51,8 @@ namespace AnarchyChess.Scripts.Boards
             {
                 for (var x = 0; x < pieceStrings[y].Count; x++)
                 {
-                    var ch         = pieceStrings[pieceStrings.Count - y - 1][x];
-                    var  pieceClass = SymbolToPiece[char.ToUpper(ch)];
+                    var ch = pieceStrings[pieceStrings.Count - y - 1][x];
+                    var pieceClass = SymbolToPiece[char.ToUpper(ch)];
                     if (pieceClass == null) continue;
 
                     var pieceConstructor = pieceClass.GetConstructor(new[] { typeof(Side) });
