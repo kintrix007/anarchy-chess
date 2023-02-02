@@ -71,19 +71,17 @@ namespace AnarchyChess.Scripts.Moves
         public static bool ValidateNoCheck(Game game, Move foldedMove)
         {
             var originalPiece = game.Board[foldedMove.From];
-
-            foreach (var move in foldedMove.Unfold())
+            var gameClone = game.Clone();
+            
+            foreach (var move in foldedMove.Unfold().Where(move => game.Board.IsInBounds(move.To)))
             {
-                if (!game.Board.IsInBounds(move.To)) continue;
-                
-                var gameClone = game.Clone();
                 gameClone.Board.InternalApplyMove(move);
                 
                 for (var y = 0; y < 8; y++)
                 {
                     for (var x = 0; x < 8; x++)
                     {
-                        var pos   = new Pos(x, y);
+                        var pos = new Pos(x, y);
                         var piece = gameClone.Board[pos];
                         if (piece == null) continue;
                         if (piece.Side == originalPiece.Side) continue;
