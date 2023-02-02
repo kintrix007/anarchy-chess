@@ -51,7 +51,7 @@ namespace AnarchyChess.Scripts.Pieces
         {
             var piece = game.Board[pos];
             var moves = new List<Move>();
-            if (piece.MoveCount >= 0) return moves;
+            if (piece.MoveCount > 0) return moves;
 
             moves.AddRange(_InternalCastle(true, game, pos));
             moves.AddRange(_InternalCastle(false, game, pos));
@@ -63,10 +63,11 @@ namespace AnarchyChess.Scripts.Pieces
         //TODO It should just be unmoved and in the same row/column.
         private static IEnumerable<Move> _InternalCastle(bool isLeft, Game game, Pos pos)
         {
-            var rookX     = isLeft ? 0 : 7;
+            var rookX = isLeft ? 0 : 7;
             var direction = isLeft ? -1 : 1;
             var castlable = game.Board[pos.SetX(rookX)];
-            if (!(castlable is ICastlable) || castlable.MoveCount == 0) return new List<Move>();
+            if (!(castlable is ICastlable)) return new List<Move>();
+            if (castlable.MoveCount != 0) return new List<Move>();
 
             for (var x = pos.X + direction; x != rookX; x += direction)
             {
@@ -74,8 +75,9 @@ namespace AnarchyChess.Scripts.Pieces
                 if (game.Board[pos.SetX(x)] != null) return new List<Move>();
             }
 
-            var move = Move.Relative(pos, new Pos(2 * direction, 0))
-                .AddFollowUp(Move.Absolute(pos.SetX(rookX), pos.AddX(1 * -direction)));
+            var newKingPos = pos.AddX(2 * direction);
+            var move = Move.Absolute(pos, newKingPos)
+                .AddFollowUp(Move.Absolute(pos.SetX(rookX), newKingPos.AddX(1 * -direction)));
 
             return new List<Move> { move };
         }
