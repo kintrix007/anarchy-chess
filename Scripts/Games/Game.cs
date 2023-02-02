@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
@@ -82,6 +83,18 @@ namespace AnarchyChess.Scripts.Games
 
             Board.InternalApplyMove(move);
             return true;
+        }
+
+        public IEnumerable<Move> GetAllValidMoves(Side side)
+        {
+            var moves = new List<Move>();
+            foreach (var (pos, piece) in Board)
+            {
+                if (piece.Side != side) continue;
+                moves.AddRange(piece.GetMoves(this, pos).Where(ValidateMove));
+            }
+
+            return moves;
         }
 
         /// <summary>
