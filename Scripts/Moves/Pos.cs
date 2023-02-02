@@ -30,8 +30,12 @@ namespace AnarchyChess.Scripts.Moves
             Y = y;
         }
 
-        public Pos(char x, int y) : this(LetterToCoord(x), y - 1) {}
-
+        /// <summary>
+        /// Create a new position from a "chess notation".
+        /// For example A1 would be Pos(0, 0), and D3 would be Pos(3, 2).
+        /// </summary>
+        /// <param name="pos">The position as a string</param>
+        /// <exception cref="ArgumentException">If the position is a malformed string</exception>
         public Pos(string pos) : this(pos[0], int.Parse(pos.Substring(1)))
         {
             if (pos.Length != 2) throw new ArgumentException();
@@ -44,17 +48,46 @@ namespace AnarchyChess.Scripts.Moves
         public static bool operator==(Pos a, Pos b) => a?.Equals(b) ?? false;
         public static bool operator!=(Pos a, Pos b) => !(a == b);
 
+        /// <summary>
+        /// Return a new position with the absolute value of X and Y respectively.
+        /// </summary>
+        /// <returns>A new position</returns>
         public Pos Abs() => new Pos(Math.Abs(X), Math.Abs(Y));
+
+        /// <summary>
+        /// Return a new position with X incremented by some value.
+        /// </summary>
+        /// <param name="x">Increment the X position by this much</param>
+        /// <returns>The new position</returns>
         public Pos AddX(int x) => new Pos(X + x, Y);
+
+        /// <summary>
+        /// Return a new position with Y incremented by some value.
+        /// </summary>
+        /// <param name="y">Increment the Y position by this much</param>
+        /// <returns>The new position</returns>
         public Pos AddY(int y) => new Pos(X, Y + y);
+
+        /// <summary>
+        /// Return a new position with X set to some value, leaving Y unchanged.
+        /// </summary>
+        /// <param name="x">The new value of X</param>
+        /// <returns>The new position</returns>
         public Pos SetX(int x) => new Pos(x, Y);
+
+        /// <summary>
+        /// Return a new position with Y set to some value, leaving X unchanged.
+        /// </summary>
+        /// <param name="y">The new value of Y</param>
+        /// <returns>The new position</returns>
         public Pos SetY(int y) => new Pos(X, y);
 
-        private static int LetterToCoord(char ch)
-        {
-            if (!(('a' <= ch && ch <= 'h') || ('A' <= ch && ch <= 'H'))) throw new ArgumentException();
-            return char.ToLower(ch) - 'a';
-        }
+        /// <summary>
+        /// Convert this position to a string in "chess notation".
+        /// Invalid positions such as Pos(-1, -4) will look strange.
+        /// </summary>
+        /// <returns>The string representation of this position</returns>
+        public string ToChessString() => $"<{char.ToString((char)(X + 'A'))}{Y + 1}>";
 
         public override bool Equals(object obj)
         {
@@ -78,8 +111,19 @@ namespace AnarchyChess.Scripts.Moves
             }
         }
 
-        public string ToChessString() => $"<{char.ToString((char)(X + 'A'))}{Y + 1}>";
-
         public override string ToString() => $"Pos({X}, {Y})";
+
+        /* --- Protected --- */
+
+        protected Pos(char x, int y) : this(LetterToCoord(x), y - 1) {}
+
+        /* --- Private --- */
+
+        private static int LetterToCoord(char ch)
+        {
+            var upper = char.ToUpper(ch);
+            if (!('A' <= upper && upper <= 'Z')) throw new ArgumentException();
+            return upper - 'A';
+        }
     }
 }

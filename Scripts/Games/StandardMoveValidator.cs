@@ -23,8 +23,8 @@ namespace AnarchyChess.Scripts.Games
         {
             foreach (var move in foldedMove.Unfold())
             {
-                if (move.To.X < 0 || move.To.X >= 8) return false;
-                if (move.To.Y < 0 || move.To.Y >= 8) return false;
+                if (move.To.X < 0 || move.To.X >= game.Board.Width) return false;
+                if (move.To.Y < 0 || move.To.Y >= game.Board.Height) return false;
             }
 
             return true;
@@ -69,15 +69,16 @@ namespace AnarchyChess.Scripts.Games
         public static bool ValidateNoCheck(Game game, Move foldedMove)
         {
             var originalPiece = game.Board[foldedMove.From];
+            if (originalPiece == null) return false;
             var gameClone = game.Clone();
 
             foreach (var move in foldedMove.Unfold().Where(move => game.Board.IsInBounds(move.To)))
             {
                 gameClone.Board.InternalApplyMove(move);
 
-                for (var y = 0; y < 8; y++)
+                for (var y = 0; y < game.Board.Height; y++)
                 {
-                    for (var x = 0; x < 8; x++)
+                    for (var x = 0; x < game.Board.Width; x++)
                     {
                         var pos = new Pos(x, y);
                         var piece = gameClone.Board[pos];

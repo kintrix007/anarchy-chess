@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
@@ -23,6 +22,12 @@ namespace AnarchyChess.Scripts.Pieces
 
         public IEnumerable<Move> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
 
+        /// <summary>
+        /// The normal moves of the Bishop, i.e. the diagonal lines.
+        /// </summary>
+        /// <param name="game">The current game</param>
+        /// <param name="pos">The position from where to generate the moves</param>
+        /// <returns>The possible (unvalidated) moves</returns>
         [NotNull, ItemNotNull]
         public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {

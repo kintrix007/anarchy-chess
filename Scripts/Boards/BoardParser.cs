@@ -70,14 +70,14 @@ namespace AnarchyChess.Scripts.Boards
 
         public static string DumpTemplate(this Board board)
         {
-            var pieceStrings = new string[8][];
+            var pieceStrings = new string[board.Height][];
 
-            for (var y = 0; y < 8; y++)
+            for (var y = 0; y < board.Height; y++)
             {
-                pieceStrings[y] = new string[8];
-                for (var x = 0; x < 8; x++)
+                pieceStrings[y] = new string[board.Width];
+                for (var x = 0; x < board.Width; x++)
                 {
-                    var piece = board[new Pos(x, 7 - y)];
+                    var piece = board[new Pos(x, board.Height - 1 - y)];
                     if (piece == null)
                     {
                         pieceStrings[y][x] = "-";

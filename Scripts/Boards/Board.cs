@@ -7,20 +7,28 @@ using Resource = Godot.Resource;
 
 namespace AnarchyChess.Scripts.Boards
 {
+    /// <summary>
+    /// Object to hold all the pieces.
+    /// </summary>
     //TODO Make it iterable
     public class Board : Resource
     {
         [NotNull, ItemCanBeNull] private readonly IPiece[,] _pieces;
 
         //TODO Actually take these values into consideration after making them public.
-        private const int Width = 8;
-        private const int Height = 8;
+        public readonly int Width = 8;
+        public readonly int Height = 8;
 
         public Board()
         {
             _pieces = new IPiece[Width, Height];
         }
 
+        /// <summary>
+        /// Get the piece on the board at pos or null if it is empty.
+        /// </summary>
+        /// <param name="pos">Position to get the piece from</param>
+        [CanBeNull]
         public IPiece this[[NotNull] Pos pos]
         {
             get => IsInBounds(pos) ? _pieces[pos.X, pos.Y] : null;

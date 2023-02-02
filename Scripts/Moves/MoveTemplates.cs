@@ -2,20 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
-using AnarchyChess.Scripts.Moves;
 using JetBrains.Annotations;
 
-namespace AnarchyChess.Scripts.PieceHelper
+namespace AnarchyChess.Scripts.Moves
 {
     public static class MoveTemplates
     {
+        /// <summary>
+        /// Generate all the possible moves when running a straight line in a given direction.
+        /// The running will stop when it encounters a piece or the border of the board.
+        /// </summary>
+        /// <param name="board">The board to run on</param>
+        /// <param name="pos">The starting position</param>
+        /// <param name="dir">The direction to run in</param>
+        /// <returns>The possible moves in that line</returns>
         [NotNull, ItemNotNull]
         public static IEnumerable<Move> RunLine([NotNull] Board board, [NotNull] Pos pos, [NotNull] Pos dir)
         {
             var moves = new List<Move>();
             var checkPos = pos;
 
-            foreach (var _ in Enumerable.Range(0, 8))
+            foreach (var _ in Enumerable.Range(0, Math.Max(board.Width, board.Height)))
             {
                 checkPos += dir;
                 if (!board.IsInBounds(checkPos)) break;

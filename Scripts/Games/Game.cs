@@ -8,6 +8,9 @@ using Resource = Godot.Resource;
 
 namespace AnarchyChess.Scripts.Games
 {
+    /// <summary>
+    /// This object represents a game in a given state.
+    /// </summary>
     public class Game : Resource
     {
         /// <summary>
@@ -27,6 +30,9 @@ namespace AnarchyChess.Scripts.Games
         [NotNull, ItemNotNull]
         public List<Move> MoveHistory { get; private set; }
 
+        /// <summary>
+        /// The move validator of this game.
+        /// </summary>
         [NotNull] public readonly IMoveValidator Validator;
 
         /// <summary>
@@ -35,8 +41,12 @@ namespace AnarchyChess.Scripts.Games
         [CanBeNull]
         public Move LastMove => MoveHistory.Count <= 0 ? null : MoveHistory.Last();
 
-        public Game([CanBeNull] IMoveValidator validator = null) : this(new Board(), validator) {}
-
+        /// <summary>
+        /// Create a new game with played on a board and optionally with a move validator.
+        /// If a validator is not specified, it will use the standard chess move validator.
+        /// </summary>
+        /// <param name="board">The board the game is played on</param>
+        /// <param name="validator">Validator used to validate the moves</param>
         public Game([NotNull] Board board, [CanBeNull] IMoveValidator validator = null)
         {
             Board = board;
@@ -57,13 +67,9 @@ namespace AnarchyChess.Scripts.Games
         //? Might be a good idea to consider, instead, throwing an exception if unsuccessful
         public bool ApplyMove([NotNull] Move move, bool shouldValidate = true)
         {
-            if (shouldValidate)
-            {
-                var isValid = ValidateMove(move);
-                if (!isValid) return false;
-            }
-
             var movingPiece = Board[move.From];
+            if (movingPiece == null) return false;
+            if (shouldValidate && !ValidateMove(move)) return false;
 
             var taken = move.Unfold()
                 .SelectMany(x => x.TakeList.Select(p => Board.RemovePiece(p)))
@@ -78,6 +84,11 @@ namespace AnarchyChess.Scripts.Games
             return true;
         }
 
+        /// <summary>
+        /// Validate a move with this game's validator.
+        /// </summary>
+        /// <param name="move">The move to validate</param>
+        /// <returns>Whether the move is valid</returns>
         public bool ValidateMove([NotNull] Move move) => Validator.Validate(this, move);
 
         /// <summary>
@@ -87,6 +98,7 @@ namespace AnarchyChess.Scripts.Games
         /// - The scores are cloned <br/>
         /// </summary>
         /// <returns>A copy of the game</returns>
+        [NotNull]
         public Game Clone()
         {
             var gameClone = new Game(Board.Clone(), Validator);

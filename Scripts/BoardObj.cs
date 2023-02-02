@@ -13,8 +13,7 @@ namespace AnarchyChess.Scripts
     {
         public override void _Ready()
         {
-            var board = BoardTemplates.Standard();
-            GD.Print(board.DumpTemplate());
+            CastlingEnPassantDemo();
         }
 
         private static void CastlingEnPassantDemo()
