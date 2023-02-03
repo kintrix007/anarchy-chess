@@ -2,7 +2,6 @@ tool
 extends Node2D
 
 onready var board := $"%Board"
-onready var pieces := $"%Pieces"
 onready var tilemap_size: Vector2 = board.cell_size * Vector2(8, 8)
 
 var parent: Control = null

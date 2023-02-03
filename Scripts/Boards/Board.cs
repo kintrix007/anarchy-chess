@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using JetBrains.Annotations;
@@ -17,24 +16,33 @@ namespace AnarchyChess.Scripts.Boards
         [NotNull, ItemCanBeNull] private readonly IPiece[,] _pieces;
 
         //TODO Actually take these values into consideration after making them public.
-        public readonly int Width = 8;
-        public readonly int Height = 8;
+        public readonly int Width;
+        public readonly int Height;
 
         public Board()
         {
+            Width = 8;
+            Height = 8;
             _pieces = new IPiece[Width, Height];
         }
 
         /// <summary>
         /// Get the piece on the board at pos or null if it is empty.
         /// </summary>
-        /// <param name="pos">Position to get the piece from</param>
+        /// <param name="pos">The position to get the piece from</param>
         [CanBeNull]
         public IPiece this[[NotNull] Pos pos]
         {
             get => IsInBounds(pos) ? _pieces[pos.X, pos.Y] : null;
             private set => _pieces[pos.X, pos.Y] = value;
         }
+
+        /// <summary>
+        /// Get the piece on the board at pos or null if it is empty.
+        /// </summary>
+        /// <param name="x">The x position to get the piece from</param>
+        /// <param name="y">The y position to get the piece from</param>
+        [CanBeNull] public IPiece this[int x, int y] => this[new Pos(x, y)];
 
         /// <summary>
         /// Check if a position is in the bounds of this board.

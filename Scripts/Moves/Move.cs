@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
 using JetBrains.Annotations;
+using Resource = Godot.Resource;
 
 namespace AnarchyChess.Scripts.Moves
 {

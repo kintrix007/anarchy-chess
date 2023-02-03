@@ -1,10 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
+using Godot;
 using JetBrains.Annotations;
+using Object = Godot.Object;
 using Resource = Godot.Resource;
 
 namespace AnarchyChess.Scripts.Games
@@ -14,6 +15,16 @@ namespace AnarchyChess.Scripts.Games
     /// </summary>
     public class Game : Resource
     {
+        [Signal]
+        public delegate void GameCreated([NotNull] Game game);
+
+        [Signal]
+        public delegate void PieceMoved([NotNull] Move move);
+        
+        // Cannot use interfaces in signal signatures...
+        [Signal]
+        public delegate void PieceTaken([NotNull] Pos pos, [NotNull] Object piece);
+        
         /// <summary>
         /// The board this game is played on.
         /// </summary>

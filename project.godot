@@ -29,6 +29,10 @@ window/stretch/aspect="expand"
 
 common/drop_mouse_on_gui_input_disabled=true
 
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
 [mono]
 
 project/assembly_name="AnarchyChess"
