@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
@@ -55,6 +56,12 @@ namespace AnarchyChess.Scripts.Games
         /// </summary>
         [CanBeNull]
         public Move LastMove => MoveHistory.Count <= 0 ? null : MoveHistory.Last();
+
+        /// <summary>
+        /// Should never be used, but Godot is complaining about the lack of its existence.
+        /// </summary>
+        /// <exception cref="Exception">Is always thrown</exception>
+        public Game() => throw new Exception();
 
         /// <summary>
         /// Create a new game with played on a board and optionally with a move validator.
