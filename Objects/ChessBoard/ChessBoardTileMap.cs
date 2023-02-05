@@ -1,57 +1,113 @@
 using System.Collections.Generic;
+using AnarchyChess.Scripts;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Compatibility;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
-using Godot;
+using AnarchyChess.Scripts.PieceHelper;
+using AnarchyChess.Scripts.Pieces;
 using JetBrains.Annotations;
+using Godot;
 
-public class ChessBoardTileMap : TileMap
+namespace AnarchyChess.Objects.ChessBoard
 {
-    public override void _Ready()
+    public class ChessBoardTileMap : TileMap, IManagedGame
     {
-        var game = new Game(BoardTemplates.Standard());
-        OnNewBoard(game);
-        OnPieceMoved(game, Move.Relative(new Pos("E2"), new Pos(0, 2)));
-    }
+        private Node _pieces;
+        private readonly Tween _tween = new Tween();
+        private GameManager _gameManager;
 
-    [NotNull]
-    public readonly Dictionary<Pos, Control> Pieces = new Dictionary<Pos, Control>();
+        [NotNull] public readonly Dictionary<Pos, Control> Pieces = new Dictionary<Pos, Control>();
 
-    public void OnPieceMoved([NotNull] Game game, [NotNull] Move move)
-    {
-        var piece = Pieces[move.From];
-        var pos = move.To;
-        Pieces[pos] = piece;
-        var worldPosition = MapToWorld(PosToBoardVector2(game, pos));
-        
-        piece.RectPosition = worldPosition;
-        Pieces.Remove(move.From);
-    }
-    
-    public void OnNewBoard([NotNull] Game game)
-    {
-        foreach (var c in GetChildren())
+        public override void _Ready()
         {
-            var child = (Node)c;
-            child.QueueFree();
+            _pieces = GetNode("%Pieces");
+            AddChild(_tween);
+
+            var game = new Game(BoardTemplates.Standard());
+            _gameManager = new GameManager(game)
+                .SetDefaultTexturePath("res://icon.png")
+                .RegisterPiece(typeof(King), "res://Assets/Pieces/{0}_king.png")
+                .RegisterPiece(typeof(Pawn), "res://Assets/Pieces/{0}_pawn.png")
+                .RegisterPiece(typeof(Knight), "res://Assets/Pieces/{0}_knight.png")
+                .RegisterPiece(typeof(Bishop), "res://Assets/Pieces/{0}_bishop.png")
+                .RegisterPiece(typeof(Rook), "res://Assets/Pieces/{0}_rook.png")
+                .RegisterPiece(typeof(Queen), "res://Assets/Pieces/{0}_queen.png")
+                .Manage(this);
+
+            game.Create();
         }
-        
-        Pieces.Clear();
-        foreach (var (pos, piece) in game.Board)
+
+        private float _time = 0;
+        private Side _last = Side.White;
+
+        public override void _Process(float delta)
         {
-            var tex = new TextureRect();
-            tex.Texture = GD.Load<Texture>("res://icon.png");
-            tex.RectPosition = MapToWorld(PosToBoardVector2(game, pos));
-            
-            AddChild(tex);
-            Pieces[pos] = tex;
+            _time += delta;
+            if (_time > 0.5)
+            {
+                var move = BoardObj.GetRandomMove(_gameManager.Game, _last);
+                _last = _last == Side.White ? Side.Black : Side.White;
+                _gameManager.Game.ApplyMove(move);
+                _time = 0;
+            }
+        }
+
+        public void OnGameCreated(Game game)
+        {
+            Pieces.Clear();
+            foreach (var c in _pieces.GetChildren())
+            {
+                var child = (Node)c;
+                child.QueueFree();
+            }
+
+            foreach (var (pos, piece) in game.Board)
+            {
+                var tex = new TextureRect();
+                tex.Texture = _gameManager.GetTexture(piece);
+                tex.RectPosition = MapToWorld(PosToBoardVector2(game, pos));
+
+                _pieces.AddChild(tex);
+                Pieces[pos] = tex;
+            }
+        }
+
+        public void OnPieceMoved(Game game, Move move)
+        {
+            var pos = move.To;
+            var piece = Pieces[move.From];
+            Pieces[pos] = piece;
+            Pieces.Remove(move.From);
+
+            var worldPosition = MapToWorld(PosToBoardVector2(game, pos));
+
+            _tween.InterpolateProperty(
+                piece, "rect_position",
+                null, worldPosition,
+                0.3f, Tween.TransitionType.Cubic, Tween.EaseType.Out
+            );
+
+            _tween.Start();
+        }
+
+        public void OnPieceRemoved(Game game, Pos pos, Object piece)
+        {
+            if (!Pieces.ContainsKey(pos)) GD.Print("Oups");
+            var boardPiece = Pieces[pos];
+            boardPiece.QueueFree();
+            Pieces.Remove(pos);
+        }
+
+        public void OnPieceAdded(Game game, Pos pos, Object piece)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private static Vector2 PosToBoardVector2([NotNull] Game game, [NotNull] Pos pos)
+        {
+            var translatedPos = pos.SetY(game.Board.Height - 1 - pos.Y);
+            return translatedPos.ToVector2();
         }
     }
-
-    private static Vector2 PosToBoardVector2([NotNull] Game game, [NotNull] Pos pos)
-    {
-        var translatedPos = pos.SetY(game.Board.Height - 1 - pos.Y);
-        return translatedPos.ToVector2();
-    } 
 }

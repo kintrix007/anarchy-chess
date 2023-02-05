@@ -14,12 +14,12 @@ namespace AnarchyChess.Scripts.PieceHelper
         /// The cost of this piece.
         /// </summary>
         int Cost { get; }
-        
+
         /// <summary>
         /// The side on which this piece plays.
         /// </summary>
         Side Side { get; }
-        
+
         /// <summary>
         /// The amount of times this piece has moved.
         /// </summary>

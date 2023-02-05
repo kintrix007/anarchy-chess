@@ -3,10 +3,10 @@ using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
-using Godot;
 using JetBrains.Annotations;
 using Object = Godot.Object;
 using Resource = Godot.Resource;
+using Signal = Godot.SignalAttribute;
 
 namespace AnarchyChess.Scripts.Games
 {
@@ -19,12 +19,15 @@ namespace AnarchyChess.Scripts.Games
         public delegate void GameCreated([NotNull] Game game);
 
         [Signal]
-        public delegate void PieceMoved([NotNull] Move move);
-        
-        // Cannot use interfaces in signal signatures...
+        public delegate void PieceMoved([NotNull] Game game, [NotNull] Move move);
+
+        // Cannot use interface types in signal signatures...
         [Signal]
-        public delegate void PieceTaken([NotNull] Pos pos, [NotNull] Object piece);
-        
+        public delegate void PieceRemoved([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
+
+        [Signal]
+        public delegate void PieceAdded([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
+
         /// <summary>
         /// The board this game is played on.
         /// </summary>
@@ -68,6 +71,17 @@ namespace AnarchyChess.Scripts.Games
                 { Side.White, 0 },
                 { Side.Black, 0 },
             };
+
+            board.Connect(nameof(Board.PieceAdded), this, nameof(OnPieceAdded));
+            board.Connect(nameof(Board.PieceRemoved), this, nameof(OnPieceRemoved));
+        }
+
+        /// <summary>
+        /// Create the game. Only used to send the signal that it has been created.
+        /// </summary>
+        public void Create()
+        {
+            EmitSignal(nameof(GameCreated), this);
         }
 
         /// <summary>
@@ -93,6 +107,8 @@ namespace AnarchyChess.Scripts.Games
             MoveHistory.Add(move);
 
             Board.InternalApplyMove(move);
+
+            EmitSignal(nameof(PieceMoved), this, move);
             return true;
         }
 
@@ -133,6 +149,16 @@ namespace AnarchyChess.Scripts.Games
             gameClone.Scores[Side.Black] = Scores[Side.Black];
 
             return gameClone;
+        }
+
+        private void OnPieceAdded([NotNull] Pos pos, [NotNull] Object piece)
+        {
+            EmitSignal(nameof(PieceAdded), this, pos, piece);
+        }
+
+        private void OnPieceRemoved([NotNull] Pos pos, [NotNull] Object piece)
+        {
+            EmitSignal(nameof(PieceRemoved), this, pos, piece);
         }
     }
 }

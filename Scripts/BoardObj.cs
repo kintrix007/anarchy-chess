@@ -64,7 +64,7 @@ R - - - K - - R
             }
         }
 
-        private static Move GetRandomMove(Game game, Side side)
+        public static Move GetRandomMove(Game game, Side side)
         {
             var rnd = new Random();
 

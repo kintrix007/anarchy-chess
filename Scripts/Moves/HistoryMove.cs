@@ -7,8 +7,5 @@ namespace AnarchyChess.Scripts.Moves
     /// It should have a lot more convenience fields,
     /// such as what the moving piece is, what pieces it captured etc...
     /// </summary>
-    public class HistoryMove : Resource
-    {
-        
-    }
+    public class HistoryMove : Resource {}
 }

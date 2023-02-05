@@ -1,10 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using JetBrains.Annotations;
+using Signal = Godot.SignalAttribute;
 using Resource = Godot.Resource;
+using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Boards
 {
@@ -13,6 +16,12 @@ namespace AnarchyChess.Scripts.Boards
     /// </summary>
     public class Board : Resource, IEnumerable<(Pos pos, IPiece piece)>
     {
+        [Signal]
+        public delegate void PieceAdded([NotNull] Pos pos, [NotNull] Object piece);
+
+        [Signal]
+        public delegate void PieceRemoved([NotNull] Pos pos, [NotNull] Object piece);
+
         [NotNull, ItemCanBeNull] private readonly IPiece[,] _pieces;
 
         //TODO Actually take these values into consideration after making them public.
@@ -42,7 +51,8 @@ namespace AnarchyChess.Scripts.Boards
         /// </summary>
         /// <param name="x">The x position to get the piece from</param>
         /// <param name="y">The y position to get the piece from</param>
-        [CanBeNull] public IPiece this[int x, int y] => this[new Pos(x, y)];
+        [CanBeNull]
+        public IPiece this[int x, int y] => this[new Pos(x, y)];
 
         /// <summary>
         /// Check if a position is in the bounds of this board.
@@ -60,6 +70,8 @@ namespace AnarchyChess.Scripts.Boards
         public void AddPiece([NotNull] Pos pos, [NotNull] IPiece piece)
         {
             if (this[pos] != null) throw new ArgumentException($"There is already a piece at {pos}");
+
+            EmitSignal(nameof(Game.PieceAdded), pos, (Object)piece);
             this[pos] = piece;
         }
 
@@ -73,6 +85,12 @@ namespace AnarchyChess.Scripts.Boards
         {
             var piece = this[pos];
             this[pos] = null;
+
+            if (piece != null)
+            {
+                EmitSignal(nameof(Game.PieceRemoved), pos, (Object)piece);
+            }
+
             return piece;
         }
 

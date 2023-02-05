@@ -8,7 +8,7 @@ namespace AnarchyChess.Scripts.Compatibility
     public static class Pos2Vector
     {
         public static Vector2 ToVector2([NotNull] this Pos pos) => new Vector2(pos.X, pos.Y);
-        
+
         [NotNull]
         public static Pos ToPos(this Vector2 vec)
         {
