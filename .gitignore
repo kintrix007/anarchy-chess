@@ -9,3 +9,6 @@ data_*/
 
 # I don't think we need the .idea directory?
 .idea/
+
+# Do not include crash logs
+mono_crash*.json
