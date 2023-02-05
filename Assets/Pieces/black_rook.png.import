@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/bishop.png-1ab85a6c810b6bb857311a982778f6cc.stex"
+path="res://.import/black_rook.png-2a66c0c1e9681f505b69b92ce77b9ad2.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pieces/bishop.png"
-dest_files=[ "res://.import/bishop.png-1ab85a6c810b6bb857311a982778f6cc.stex" ]
+source_file="res://Assets/Pieces/black_rook.png"
+dest_files=[ "res://.import/black_rook.png-2a66c0c1e9681f505b69b92ce77b9ad2.stex" ]
 
 [params]
 

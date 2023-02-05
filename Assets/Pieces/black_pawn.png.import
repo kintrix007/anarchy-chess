@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/knight.png-7b6160845aa8f9529107f2fb78b2975e.stex"
+path="res://.import/black_pawn.png-f8fc7e263ed08ae1e8d43678320f8e37.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pieces/knight.png"
-dest_files=[ "res://.import/knight.png-7b6160845aa8f9529107f2fb78b2975e.stex" ]
+source_file="res://Assets/Pieces/black_pawn.png"
+dest_files=[ "res://.import/black_pawn.png-f8fc7e263ed08ae1e8d43678320f8e37.stex" ]
 
 [params]
 

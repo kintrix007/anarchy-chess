@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/king.png-8910a58c4d4292272484f52c9a3f597a.stex"
+path="res://.import/white_queen.png-3148ae85a78055e1d5d4dd63a704cae8.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Pieces/king.png"
-dest_files=[ "res://.import/king.png-8910a58c4d4292272484f52c9a3f597a.stex" ]
+source_file="res://Assets/Pieces/white_queen.png"
+dest_files=[ "res://.import/white_queen.png-3148ae85a78055e1d5d4dd63a704cae8.stex" ]
 
 [params]
 
