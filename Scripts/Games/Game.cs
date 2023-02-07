@@ -30,6 +30,8 @@ namespace AnarchyChess.Scripts.Games
         [Signal]
         public delegate void PieceAdded([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
 
+        [NotNull] public readonly PieceToAscii PieceToAsciiRegistry;
+        
         /// <summary>
         /// The board this game is played on.
         /// </summary>
@@ -72,6 +74,7 @@ namespace AnarchyChess.Scripts.Games
         /// <param name="validator">Validator used to validate the moves</param>
         public Game([NotNull] Board board, [CanBeNull] IMoveValidator validator = null)
         {
+            PieceToAsciiRegistry = new PieceToAscii();
             Board = board;
             Validator = validator ?? new ChessStandardValidator();
             MoveHistory = new List<Move>();
