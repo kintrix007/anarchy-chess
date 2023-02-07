@@ -27,15 +27,15 @@ namespace AnarchyChess.Objects.ChessBoard
             _pieces = GetNode("%Pieces");
             AddChild(_tween);
 
-//             var game = new Game(@"- - - - k - - -
-// - - - - - - - -
-// - - - - - - - -
-// - - - - - - - -
-// - - - - - - - -
-// - - - - - - - -
-// - - - - - - - -
-// Q - - Q - - - Q".ParseBoard());
-var game = new Game(BoardTemplates.Standard());
+            //             var game = new Game(@"- - - - k - - -
+            // - - - - - - - -
+            // - - - - - - - -
+            // - - - - - - - -
+            // - - - - - - - -
+            // - - - - - - - -
+            // - - - - - - - -
+            // Q - - Q - - - Q".ParseBoard());
+            var game = new Game(BoardTemplates.Standard());
             _gameManager = new GameManager(game)
                 .SetDefaultTexturePath("res://icon.png")
                 .RegisterPiece(typeof(King), "res://Assets/Pieces/{0}_king.png")
@@ -65,6 +65,7 @@ var game = new Game(BoardTemplates.Standard());
                     SetProcess(false);
                     return;
                 }
+
                 var move = moves[Math.Abs((int)GD.Randi()) % moves.Count];
                 _last = _last == Side.White ? Side.Black : Side.White;
                 _gameManager.Game.ApplyMove(move);

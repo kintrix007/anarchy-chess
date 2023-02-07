@@ -35,7 +35,7 @@ namespace AnarchyChess.Scripts.Pieces
             var piece  = game.Board[pos];
             var moves  = new List<Move>();
             if (piece == null) return moves;
-            
+
             var facing = piece.Side == Side.White ? 1 : -1;
             moves.Add(Move.Relative(pos, new Pos(0, facing)));
 
@@ -69,7 +69,7 @@ namespace AnarchyChess.Scripts.Pieces
             var piece = game.Board[pos];
             var moves = new List<Move>();
             if (piece == null) return moves;
-            
+
             var facing = piece.Side == Side.White ? 1 : -1;
             var direction = isLeft ? -1 : 1;
             var opponentPawnPos = pos.AddX(direction);

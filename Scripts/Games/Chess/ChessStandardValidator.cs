@@ -1,6 +1,5 @@
 using System.Linq;
 using AnarchyChess.Scripts.Moves;
-using AnarchyChess.Scripts.Pieces;
 using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts.Games.Chess
