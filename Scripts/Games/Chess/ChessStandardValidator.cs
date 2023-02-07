@@ -3,9 +3,9 @@ using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.Pieces;
 using JetBrains.Annotations;
 
-namespace AnarchyChess.Scripts.Games
+namespace AnarchyChess.Scripts.Games.Chess
 {
-    public class StandardMoveValidator : IMoveValidator
+    public class ChessStandardValidator : IMoveValidator
     {
         public bool Validate(Game game, Move foldedMove) => IsValidMove(game, foldedMove);
 
@@ -72,28 +72,9 @@ namespace AnarchyChess.Scripts.Games
             if (originalPiece == null) return false;
             var gameClone = game.Clone();
 
-            foreach (var move in foldedMove.Unfold().Where(move => game.Board.IsInBounds(move.To)))
-            {
-                gameClone.Board.InternalApplyMove(move);
-
-                for (var y = 0; y < game.Board.Height; y++)
-                {
-                    for (var x = 0; x < game.Board.Width; x++)
-                    {
-                        var pos = new Pos(x, y);
-                        var piece = gameClone.Board[pos];
-                        if (piece == null) continue;
-                        if (piece.Side == originalPiece.Side) continue;
-
-                        var causesCheck = piece.GetMoves(gameClone, pos)
-                            .Any(m => gameClone.Board[m.To] is King k && k.Side == originalPiece.Side);
-
-                        if (causesCheck) return false;
-                    }
-                }
-            }
-
-            return true;
+            gameClone.Board.InternalApplyMove(foldedMove);
+            var isValid = !ChessMateCheck.IsCheck(gameClone, originalPiece.Side);
+            return isValid;
         }
     }
 }

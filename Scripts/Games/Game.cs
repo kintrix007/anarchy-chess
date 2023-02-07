@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
+using AnarchyChess.Scripts.Games.Chess;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using JetBrains.Annotations;
@@ -72,7 +73,7 @@ namespace AnarchyChess.Scripts.Games
         public Game([NotNull] Board board, [CanBeNull] IMoveValidator validator = null)
         {
             Board = board;
-            Validator = validator ?? new StandardMoveValidator();
+            Validator = validator ?? new ChessStandardValidator();
             MoveHistory = new List<Move>();
             Scores = new Dictionary<Side, int> {
                 { Side.White, 0 },

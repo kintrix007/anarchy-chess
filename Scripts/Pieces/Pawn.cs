@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts.Pieces
 {
-    public class Pawn : Object, IPiece, IPromotable
+    public class Pawn : Resource, IPiece, IPromotable
     {
         public int Cost => 1;
         public Side Side { get; }
@@ -34,6 +34,8 @@ namespace AnarchyChess.Scripts.Pieces
         {
             var piece  = game.Board[pos];
             var moves  = new List<Move>();
+            if (piece == null) return moves;
+            
             var facing = piece.Side == Side.White ? 1 : -1;
             moves.Add(Move.Relative(pos, new Pos(0, facing)));
 
@@ -65,10 +67,12 @@ namespace AnarchyChess.Scripts.Pieces
         private static IEnumerable<Move> _InternalEnPassant(bool isLeft, Game game, Pos pos)
         {
             var piece = game.Board[pos];
+            var moves = new List<Move>();
+            if (piece == null) return moves;
+            
             var facing = piece.Side == Side.White ? 1 : -1;
             var direction = isLeft ? -1 : 1;
             var opponentPawnPos = pos.AddX(direction);
-            var moves = new List<Move>();
 
             if (!(game.Board[opponentPawnPos] is Pawn p)) return moves;
             if (p.Side == piece.Side) return moves;

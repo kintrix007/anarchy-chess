@@ -3,12 +3,12 @@ using System.Linq;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
+using Godot;
 using JetBrains.Annotations;
-using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Pieces
 {
-    public class Bishop : Object, IPiece
+    public class Bishop : Resource, IPiece
     {
         public int Cost => 3;
         public Side Side { get; }

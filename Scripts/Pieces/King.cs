@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
@@ -8,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts.Pieces
 {
-    public class King : Object, IPiece
+    public class King : Resource, IPiece
     {
         public int Cost => int.MaxValue;
         public Side Side { get; }

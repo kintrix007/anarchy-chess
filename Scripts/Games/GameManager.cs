@@ -67,7 +67,7 @@ namespace AnarchyChess.Scripts.Games
             var template = _pieceTextureRegistry[piece.GetType()];
             var path = string.Format(template, piece.Side == Side.White ? "white" : "black");
 
-            GD.Print("Path: '", path, "' exists: ", ResourceLoader.Exists(path));
+            // GD.Print("Path: '", path, "' exists: ", ResourceLoader.Exists(path));
             if (!ResourceLoader.Exists(path)) return GD.Load<Texture>(_defaultTexturePath);
 
             return GD.Load<Texture>(path);

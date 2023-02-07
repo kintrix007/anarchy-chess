@@ -1,13 +1,16 @@
+using System;
 using System.Collections.Generic;
-using AnarchyChess.Scripts;
+using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Compatibility;
 using AnarchyChess.Scripts.Games;
+using AnarchyChess.Scripts.Games.Chess;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using AnarchyChess.Scripts.Pieces;
 using JetBrains.Annotations;
 using Godot;
+using Object = Godot.Object;
 
 namespace AnarchyChess.Objects.ChessBoard
 {
@@ -24,7 +27,15 @@ namespace AnarchyChess.Objects.ChessBoard
             _pieces = GetNode("%Pieces");
             AddChild(_tween);
 
-            var game = new Game(BoardTemplates.Standard());
+//             var game = new Game(@"- - - - k - - -
+// - - - - - - - -
+// - - - - - - - -
+// - - - - - - - -
+// - - - - - - - -
+// - - - - - - - -
+// - - - - - - - -
+// Q - - Q - - - Q".ParseBoard());
+var game = new Game(BoardTemplates.Standard());
             _gameManager = new GameManager(game)
                 .SetDefaultTexturePath("res://icon.png")
                 .RegisterPiece(typeof(King), "res://Assets/Pieces/{0}_king.png")
@@ -36,6 +47,7 @@ namespace AnarchyChess.Objects.ChessBoard
                 .Manage(this);
 
             game.Create();
+            GD.Randomize();
         }
 
         private float _time = 0;
@@ -46,7 +58,14 @@ namespace AnarchyChess.Objects.ChessBoard
             _time += delta;
             if (_time > 0.5)
             {
-                var move = BoardObj.GetRandomMove(_gameManager.Game, _last);
+                var moves = _gameManager.Game.GetAllValidMoves(_last).ToList();
+                if (ChessMateCheck.IsMate(_gameManager.Game, _last))
+                {
+                    GD.Print("_ Mate.");
+                    SetProcess(false);
+                    return;
+                }
+                var move = moves[Math.Abs((int)GD.Randi()) % moves.Count];
                 _last = _last == Side.White ? Side.Black : Side.White;
                 _gameManager.Game.ApplyMove(move);
                 _time = 0;

@@ -7,7 +7,7 @@ namespace AnarchyChess.Scripts.Moves
     /// <summary>
     /// Class defining a position in chess. It can be also used as a 2D integer vector.
     /// </summary>
-    public class Pos : Object, IEquatable<Pos>
+    public class Pos : Resource, IEquatable<Pos>
     {
         /// <summary>
         /// The x coordinate on the board corresponding to the labels A to H.

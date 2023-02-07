@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
@@ -8,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts.Pieces
 {
-    public class Queen : Object, IPiece
+    public class Queen : Resource, IPiece
     {
         public int Cost => 9;
         public Side Side { get; }

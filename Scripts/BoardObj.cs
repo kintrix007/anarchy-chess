@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games;
+using AnarchyChess.Scripts.Games.Chess;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using AnarchyChess.Scripts.Pieces;
@@ -97,14 +98,14 @@ R - - - K - - R
             var firstMove = allHorseyMoves[0];
 
             GD.Print(firstMove);
-            GD.Print(StandardMoveValidator.ValidateBounds(game, firstMove));
-            GD.Print(StandardMoveValidator.ValidateOverlap(game, firstMove));
-            GD.Print(StandardMoveValidator.ValidateMustTake(game, firstMove));
-            GD.Print(StandardMoveValidator.ValidateNoCheck(game, firstMove));
+            GD.Print(ChessStandardValidator.ValidateBounds(game, firstMove));
+            GD.Print(ChessStandardValidator.ValidateOverlap(game, firstMove));
+            GD.Print(ChessStandardValidator.ValidateMustTake(game, firstMove));
+            GD.Print(ChessStandardValidator.ValidateNoCheck(game, firstMove));
 
             GD.Print(game.Board.DumpTemplate());
 
-            var validHorseyMoves = allHorseyMoves.Where(x => StandardMoveValidator.IsValidMove(game, x)).ToList();
+            var validHorseyMoves = allHorseyMoves.Where(x => ChessStandardValidator.IsValidMove(game, x)).ToList();
             GD.Print(string.Join(", ", validHorseyMoves.Select(x => x.ToString())));
 
             var firstValidMove = validHorseyMoves.Count <= 0 ? null : validHorseyMoves.First();
