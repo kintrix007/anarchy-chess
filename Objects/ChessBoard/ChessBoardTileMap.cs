@@ -27,14 +27,14 @@ namespace AnarchyChess.Objects.ChessBoard
             _pieces = GetNode("%Pieces");
             AddChild(_tween);
 
-            //             var game = new Game(@"- - - - k - - -
+            //             var game = new Game(@"- - - - - - - -
             // - - - - - - - -
             // - - - - - - - -
             // - - - - - - - -
             // - - - - - - - -
+            // - - - p - - - -
             // - - - - - - - -
-            // - - - - - - - -
-            // Q - - Q - - - Q".ParseBoard());
+            // - - - - P - - -".ParseBoard());
             var game = new Game(BoardTemplates.Standard());
             _gameManager = new GameManager(game)
                 .SetDefaultTexturePath("res://icon.png")
@@ -113,7 +113,7 @@ namespace AnarchyChess.Objects.ChessBoard
 
         public void OnPieceRemoved(Game game, Pos pos, Object piece)
         {
-            if (!Pieces.ContainsKey(pos)) GD.Print("Oups");
+            if (!Pieces.ContainsKey(pos)) return;
             var boardPiece = Pieces[pos];
             boardPiece.QueueFree();
             Pieces.Remove(pos);
