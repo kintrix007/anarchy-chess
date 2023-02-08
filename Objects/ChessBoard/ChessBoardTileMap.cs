@@ -124,7 +124,6 @@ namespace AnarchyChess.Objects.ChessBoard
 
         public void OnPieceAdded(Game game, Pos pos, Object piece)
         {
-            GD.Print("got here");
             var tex = new TextureRect();
             tex.Texture = _gameManager.GetTexture((IPiece) piece);
             tex.RectPosition = MapToWorld(PosToBoardVector2(game, pos));
