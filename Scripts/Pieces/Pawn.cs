@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;

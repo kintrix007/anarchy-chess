@@ -10,7 +10,6 @@ namespace AnarchyChess.Scripts.Boards
 {
     public static class BoardParser
     {
-        //TODO PLEASE clean up this mess. I beg you.
         public static Board ParseBoard(this string template, [NotNull] PieceToAscii registry)
         {
             var board = new Board();
