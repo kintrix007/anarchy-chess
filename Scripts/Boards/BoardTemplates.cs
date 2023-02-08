@@ -1,3 +1,6 @@
+using AnarchyChess.Scripts.Games;
+using AnarchyChess.Scripts.Pieces;
+
 namespace AnarchyChess.Scripts.Boards
 {
     public static class BoardTemplates
@@ -6,15 +9,18 @@ namespace AnarchyChess.Scripts.Boards
         /// The standard template from Chess.
         /// </summary>
         /// <returns>The board with pieces from that template</returns>
-        public static Board Standard() =>
-            @"r n b q k b n r
-p p p p p p p p
-- - - - - - - -
-- - - - - - - -
-- - - - - - - -
-- - - - - - - -
-P P P P P P P P
-R N B Q K B N R"
-                .ParseBoard();
+        public static (Board, PieceToAscii) Standard()
+        {
+            var registry = new PieceToAscii()
+                .Register(typeof(King), 'K')
+                .Register(typeof(Pawn), 'P')
+                .Register(typeof(Knight), 'N')
+                .Register(typeof(Bishop), 'B')
+                .Register(typeof(Rook), 'R')
+                .Register(typeof(Queen), 'Q');
+            
+            var board = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR".ParseBoard(registry);
+            return (board, registry);
+        }
     }
 }

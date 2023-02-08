@@ -1,74 +1,50 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
-using AnarchyChess.Scripts.Pieces;
+using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts.Boards
 {
     public static class BoardParser
     {
-        public static readonly Dictionary<char, Type> SymbolToPiece = new Dictionary<char, Type> {
-            { 'P', typeof(Pawn) },
-            { 'K', typeof(King) },
-            { 'B', typeof(Bishop) },
-            { 'N', typeof(Knight) },
-            { 'R', typeof(Rook) },
-            { 'Q', typeof(Queen) },
-            { '-', null },
-        };
-
-        public static readonly Dictionary<Type, char> PieceToSymbol = new Dictionary<Type, char> {
-            { typeof(Pawn), 'P' },
-            { typeof(King), 'K' },
-            { typeof(Bishop), 'B' },
-            { typeof(Knight), 'N' },
-            { typeof(Rook), 'R' },
-            { typeof(Queen), 'Q' },
-        };
-
         //TODO PLEASE clean up this mess. I beg you.
-        public static Board ParseBoard(this string template)
+        public static Board ParseBoard(this string template, [NotNull] PieceToAscii registry)
         {
-            var lines = template.Split('\n');
-            if (lines.Length != 8) throw new ArgumentException();
-
-            var pieceStrings = lines.Select(
-                l => {
-                    var pieces = l
-                        .Split(' ', '\t')
-                        .Where(s => s != "")
-                        .Select(s => s[0])
-                        .ToList();
-
-                    if (pieces.Count != 8) throw new ArgumentException();
-                    return pieces;
-                }).ToList();
-
             var board = new Board();
-            for (var y = 0; y < pieceStrings.Count; y++)
+
+            var x = 0;
+            var y = 7;
+            foreach (var ch in template)
             {
-                for (var x = 0; x < pieceStrings[y].Count; x++)
+                if (ch == '/')
                 {
-                    var ch = pieceStrings[pieceStrings.Count - y - 1][x];
-                    var pieceClass = SymbolToPiece[char.ToUpper(ch)];
-                    if (pieceClass == null) continue;
-
-                    var pieceConstructor = pieceClass.GetConstructor(new[] { typeof(Side) });
-                    if (pieceConstructor == null) throw new NullReferenceException();
-
-                    var piece = (IPiece)pieceConstructor.Invoke(new object[]
-                        { char.IsUpper(ch) ? Side.White : Side.Black });
-
-                    board.AddPiece(new Pos(x, y), piece);
+                    x = 0;
+                    y--;
+                    continue;
                 }
+
+                if (char.IsDigit(ch))
+                {
+                    x += int.Parse(ch.ToString());
+                    continue;
+                }
+
+                var pieceCtor = registry.GetType(ch).GetConstructor(new[] { typeof(Side) });
+                if (pieceCtor == null) throw new NullReferenceException();
+
+                var piece = (IPiece)pieceCtor.Invoke(new object[]
+                    { char.IsUpper(ch) ? Side.White : Side.Black });
+                board.AddPiece(new Pos(x, y), piece);
+                x++;
             }
 
             return board;
         }
 
-        public static string DumpTemplate(this Board board)
+        public static string DumpTemplate(this Board board, [NotNull] PieceToAscii registry)
         {
             var pieceStrings = new string[board.Height][];
 
@@ -84,7 +60,7 @@ namespace AnarchyChess.Scripts.Boards
                         continue;
                     }
 
-                    var str = PieceToSymbol[piece.GetType()].ToString();
+                    var str = registry.GetAscii(piece.GetType()).ToString();
                     if (piece.Side == Side.Black) str = str.ToLower();
                     pieceStrings[y][x] = str;
                 }
