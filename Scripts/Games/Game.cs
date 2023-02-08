@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games.Chess;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
+using AnarchyChess.Scripts.Pieces;
+using Godot;
 using JetBrains.Annotations;
 using Object = Godot.Object;
 using Resource = Godot.Resource;
-using Signal = Godot.SignalAttribute;
 
 namespace AnarchyChess.Scripts.Games
 {
@@ -17,17 +19,17 @@ namespace AnarchyChess.Scripts.Games
     /// </summary>
     public class Game : Resource
     {
-        [Signal]
+        [Godot.Signal]
         public delegate void GameCreated([NotNull] Game game);
 
-        [Signal]
+        [Godot.Signal]
         public delegate void PieceMoved([NotNull] Game game, [NotNull] Move move);
 
         // Cannot use interface types in signal signatures...
-        [Signal]
+        [Godot.Signal]
         public delegate void PieceRemoved([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
 
-        [Signal]
+        [Godot.Signal]
         public delegate void PieceAdded([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
 
         [NotNull] public readonly PieceToAscii PieceToAsciiRegistry;
@@ -118,10 +120,20 @@ namespace AnarchyChess.Scripts.Games
             taken.ForEach(x => Scores[movingPiece.Side] += x.Cost);
             movingPiece.MoveCount++;
             MoveHistory.Add(move);
-
+            
             Board.InternalApplyMove(move);
-
             EmitSignal(nameof(PieceMoved), this, move);
+            
+            //temporary
+            if (move.IsPromote)
+            {
+                Task.Delay(300).ContinueWith(_ =>
+                {
+                    Board.RemovePiece(move.To);
+                    Board.AddPiece(move.To, new Knook(movingPiece.Side));
+                });
+            }
+            
             return true;
         }
 

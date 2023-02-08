@@ -32,7 +32,12 @@ namespace AnarchyChess.Scripts.Moves
         /// For example the Pawn's capturing move can only happen if it actually captures a piece.
         /// </summary>
         public bool IsMustTake { get; private set; }
-
+        
+        /// <summary>
+        /// Whether or not a move is a promotion.
+        /// </summary>
+        public bool IsPromote { get; private set; }
+        
         /// <summary>
         /// The follow-up happens right after this move, and they can only happen together.
         /// For example, for castling would be a move that has a follow-up.
@@ -94,7 +99,7 @@ namespace AnarchyChess.Scripts.Moves
         [NotNull]
         public Move Promotes()
         {
-
+            IsPromote = true;
             return this;
         }
 
