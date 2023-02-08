@@ -25,7 +25,8 @@ namespace AnarchyChess.Scripts.Pieces
             var moves = new List<Move>();
             moves.AddRange(NormalMove(game, pos));
             moves.AddRange(EnPassant(game, pos));
-
+            moves.AddRange(PromotePawn(game, pos));
+            
             return moves.ToArray();
         }
 
@@ -83,6 +84,30 @@ namespace AnarchyChess.Scripts.Pieces
 
             moves.Add(Move.Relative(pos, new Pos(direction, facing))
                 .AddTake(opponentPawnPos).Must());
+
+            return moves;
+        }
+
+        //System for Promoting a pawn.
+        //Hazel made this, it is ** garbage **
+        public static IEnumerable<Move> PromotePawn([NotNull] Game game, [NotNull] Pos pos)
+        {
+            var piece = game.Board[pos];
+            var moves = new List<Move>();
+            if (piece == null) return moves;
+            
+            var facing = piece.Side == Side.White ? 1 : -1;
+            var target = pos.AddY(facing);
+            
+            //TODO This misses first-move double pawn step
+            if (!(target.Y == 0 || target.Y == 7)) return moves;
+            
+            //If the target square is file 1 or 8, you MUST promote
+            if (target.Y == (35+35*facing)/10)
+            {
+                GD.Print("Pawn Promoted");
+                moves.Add(Move.Relative(pos, new Pos(0, facing)).Promotes());
+            }
 
             return moves;
         }

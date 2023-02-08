@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using JetBrains.Annotations;
 using Resource = Godot.Resource;
@@ -83,6 +84,17 @@ namespace AnarchyChess.Scripts.Moves
         public Move Must()
         {
             IsMustTake = true;
+            return this;
+        }
+
+        /// <summary>
+        /// TODO: Add promotion selection for user
+        /// For now, sets this move to promote piece to a Knook.
+        /// </summary>
+        [NotNull]
+        public Move Promotes()
+        {
+
             return this;
         }
 
