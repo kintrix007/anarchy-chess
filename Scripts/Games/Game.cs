@@ -31,7 +31,7 @@ namespace AnarchyChess.Scripts.Games
         public delegate void PieceAdded([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
 
         [NotNull] public readonly PieceToAscii PieceToAsciiRegistry;
-        
+
         /// <summary>
         /// The board this game is played on.
         /// </summary>
@@ -71,11 +71,13 @@ namespace AnarchyChess.Scripts.Games
         /// If a validator is not specified, it will use the standard chess move validator.
         /// </summary>
         /// <param name="board">The board the game is played on</param>
+        /// <param name="registry">The piece to character registry</param>
         /// <param name="validator">Validator used to validate the moves</param>
-        public Game([NotNull] Board board, [CanBeNull] IMoveValidator validator = null)
+        public Game([NotNull] Board board, [CanBeNull] PieceToAscii registry = null,
+            [CanBeNull] IMoveValidator validator = null)
         {
-            PieceToAsciiRegistry = new PieceToAscii();
             Board = board;
+            PieceToAsciiRegistry = registry ?? new PieceToAscii();
             Validator = validator ?? new ChessStandardValidator();
             MoveHistory = new List<Move>();
             Scores = new Dictionary<Side, int> {
@@ -152,7 +154,7 @@ namespace AnarchyChess.Scripts.Games
         [NotNull]
         public Game Clone()
         {
-            var gameClone = new Game(Board.Clone(), Validator);
+            var gameClone = new Game(Board.Clone(), registry: PieceToAsciiRegistry, validator: Validator);
 
             // I think this should make a shallow copy
             gameClone.MoveHistory = MoveHistory.ToList();
