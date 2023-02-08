@@ -37,9 +37,12 @@ namespace AnarchyChess.Objects.ChessBoard
                 .RegisterPiece(typeof(Bishop), "res://Assets/Pieces/{0}_bishop.png")
                 .RegisterPiece(typeof(Rook), "res://Assets/Pieces/{0}_rook.png")
                 .RegisterPiece(typeof(Queen), "res://Assets/Pieces/{0}_queen.png")
+                .RegisterPiece(typeof(Knook), "res://Assets/Pieces/{0}_knook.png")
                 .Manage(this);
-
             game.Create();
+
+            game.Board.RemovePiece(new Pos("A1"));
+            game.Board.AddPiece(new Pos("A1"), new Knook(Side.White));
             GD.Randomize();
         }
 
@@ -114,7 +117,12 @@ namespace AnarchyChess.Objects.ChessBoard
 
         public void OnPieceAdded(Game game, Pos pos, Object piece)
         {
-            throw new System.NotImplementedException();
+            var tex = new TextureRect();
+            tex.Texture = _gameManager.GetTexture((IPiece) piece);
+            tex.RectPosition = MapToWorld(PosToBoardVector2(game, pos));
+
+            _pieces.AddChild(tex);
+            Pieces[pos] = tex;
         }
 
         private static Vector2 PosToBoardVector2([NotNull] Game game, [NotNull] Pos pos)
