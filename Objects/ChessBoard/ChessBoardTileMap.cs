@@ -27,15 +27,8 @@ namespace AnarchyChess.Objects.ChessBoard
             _pieces = GetNode("%Pieces");
             AddChild(_tween);
 
-            //             var game = new Game(@"- - - - - - - -
-            // - - - - - - - -
-            // - - - - - - - -
-            // - - - - - - - -
-            // - - - - - - - -
-            // - - - p - - - -
-            // - - - - - - - -
-            // - - - - P - - -".ParseBoard());
-            var game = new Game(BoardTemplates.Standard());
+            var (board, registry) = BoardTemplates.Standard();
+            var game = new Game(board, registry: registry);
             _gameManager = new GameManager(game)
                 .SetDefaultTexturePath("res://icon.png")
                 .RegisterPiece(typeof(King), "res://Assets/Pieces/{0}_king.png")
