@@ -24,6 +24,7 @@ namespace AnarchyChess.Scripts.Games
 
         public PieceToAscii Register(Type piece, char ascii)
         {
+            ascii = char.ToUpper(ascii);
             if (!piece.GetInterfaces().Contains(typeof(IPiece)))
             {
                 throw new ArgumentException($"The type must represent a type of piece. '{piece}' does not.");
@@ -51,6 +52,7 @@ namespace AnarchyChess.Scripts.Games
 
         public PieceToAscii Deregister(char ascii)
         {
+            ascii = char.ToUpper(ascii);
             if (!_asciiToPieceRegistry.ContainsKey(ascii)) return this;
 
             var piece = _asciiToPieceRegistry[ascii];
@@ -64,6 +66,7 @@ namespace AnarchyChess.Scripts.Games
 
         public Type GetType(char ascii)
         {
+            ascii = char.ToUpper(ascii);
             if (!_asciiToPieceRegistry.ContainsKey(ascii)) throw new KeyNotFoundException();
             return _asciiToPieceRegistry[ascii];
         }
