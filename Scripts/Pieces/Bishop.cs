@@ -20,7 +20,7 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<Move> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
+        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
 
         /// <summary>
         /// The normal moves of the Bishop, i.e. the diagonal lines.
@@ -29,9 +29,9 @@ namespace AnarchyChess.Scripts.Pieces
         /// <param name="pos">The position from where to generate the moves</param>
         /// <returns>The possible (unvalidated) moves</returns>
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
+        public static IEnumerable<AppliedMove> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
 
             var directions = new[] {
                 new Pos(1, 1), new Pos(1, -1),

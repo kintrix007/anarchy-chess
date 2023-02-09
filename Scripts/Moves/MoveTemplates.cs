@@ -17,9 +17,9 @@ namespace AnarchyChess.Scripts.Moves
         /// <param name="dir">The direction to run in</param>
         /// <returns>The possible moves in that line</returns>
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> RunLine([NotNull] Board board, [NotNull] Pos pos, [NotNull] Pos dir)
+        public static IEnumerable<AppliedMove> RunLine([NotNull] Board board, [NotNull] Pos pos, [NotNull] Pos dir)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             var checkPos = pos;
 
             foreach (var _ in Enumerable.Range(0, Math.Max(board.Width, board.Height)))
@@ -28,7 +28,7 @@ namespace AnarchyChess.Scripts.Moves
                 if (!board.IsInBounds(checkPos)) break;
 
                 var checkPiece = board[checkPos];
-                moves.Add(Move.Absolute(pos, checkPos));
+                moves.Add(AppliedMove.Absolute(pos, checkPos));
                 if (checkPiece != null) break;
             }
 
@@ -36,7 +36,7 @@ namespace AnarchyChess.Scripts.Moves
         }
 
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> RunSteps([NotNull] Board board, [NotNull] Pos pos, [NotNull] Pos by)
+        public static IEnumerable<AppliedMove> RunSteps([NotNull] Board board, [NotNull] Pos pos, [NotNull] Pos by)
         {
             if (by.X == 0 || by.Y == 0 || Math.Abs(by.X) == Math.Abs(by.Y))
             {
@@ -48,13 +48,13 @@ namespace AnarchyChess.Scripts.Moves
             while (checkPos != pos + by)
             {
                 checkPos += dir;
-                if (!board.IsInBounds(checkPos)) return new List<Move>();
+                if (!board.IsInBounds(checkPos)) return new List<AppliedMove>();
 
                 var checkPiece = board[checkPos];
-                if (checkPiece != null) return new List<Move>();
+                if (checkPiece != null) return new List<AppliedMove>();
             }
 
-            return new List<Move> { Move.Relative(pos, by) };
+            return new List<AppliedMove> { AppliedMove.Relative(pos, by) };
         }
     }
 }

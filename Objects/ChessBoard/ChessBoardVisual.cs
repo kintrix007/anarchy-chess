@@ -14,17 +14,17 @@ using Object = Godot.Object;
 
 namespace AnarchyChess.Objects.ChessBoard
 {
-    public class ChessBoardTileMap : TileMap, IManagedGame
+    public class ChessBoardVisual : TileMap, IManagedGame
     {
-        private Node _pieces;
+        private Node _piecesParent;
         private readonly Tween _tween = new Tween();
         private GameManager _gameManager;
 
-        [NotNull] public readonly Dictionary<Pos, Control> Pieces = new Dictionary<Pos, Control>();
+        [NotNull] public readonly Dictionary<Pos, Control> PieceToControl = new Dictionary<Pos, Control>();
 
         public override void _Ready()
         {
-            _pieces = GetNode("%Pieces");
+            _piecesParent = GetNode("%Pieces");
             AddChild(_tween);
 
             var (board, registry) = BoardTemplates.Standard();
@@ -71,8 +71,8 @@ namespace AnarchyChess.Objects.ChessBoard
 
         public void OnGameCreated(Game game)
         {
-            Pieces.Clear();
-            foreach (var c in _pieces.GetChildren())
+            PieceToControl.Clear();
+            foreach (var c in _piecesParent.GetChildren())
             {
                 var child = (Node)c;
                 child.QueueFree();
@@ -84,17 +84,17 @@ namespace AnarchyChess.Objects.ChessBoard
                 tex.Texture = _gameManager.GetTexture(piece);
                 tex.RectPosition = MapToWorld(PosToBoardVector2(game, pos));
 
-                _pieces.AddChild(tex);
-                Pieces[pos] = tex;
+                _piecesParent.AddChild(tex);
+                PieceToControl[pos] = tex;
             }
         }
 
-        public void OnPieceMoved(Game game, Move move)
+        public void OnPieceMoved(Game game, AppliedMove appliedMove)
         {
-            var pos = move.To;
-            var piece = Pieces[move.From];
-            Pieces[pos] = piece;
-            Pieces.Remove(move.From);
+            var pos = appliedMove.To;
+            var piece = PieceToControl[appliedMove.From];
+            PieceToControl[pos] = piece;
+            PieceToControl.Remove(appliedMove.From);
 
             var worldPosition = MapToWorld(PosToBoardVector2(game, pos));
 
@@ -109,21 +109,20 @@ namespace AnarchyChess.Objects.ChessBoard
 
         public void OnPieceRemoved(Game game, Pos pos, Object piece)
         {
-            if (!Pieces.ContainsKey(pos)) return;
-            var boardPiece = Pieces[pos];
+            if (!PieceToControl.ContainsKey(pos)) return;
+            var boardPiece = PieceToControl[pos];
             boardPiece.QueueFree();
-            Pieces.Remove(pos);
+            PieceToControl.Remove(pos);
         }
 
         public void OnPieceAdded(Game game, Pos pos, Object piece)
         {
-            GD.Print("got here");
             var tex = new TextureRect();
             tex.Texture = _gameManager.GetTexture((IPiece) piece);
             tex.RectPosition = MapToWorld(PosToBoardVector2(game, pos));
 
-            _pieces.AddChild(tex);
-            Pieces[pos] = tex;
+            _piecesParent.AddChild(tex);
+            PieceToControl[pos] = tex;
         }
 
         private static Vector2 PosToBoardVector2([NotNull] Game game, [NotNull] Pos pos)

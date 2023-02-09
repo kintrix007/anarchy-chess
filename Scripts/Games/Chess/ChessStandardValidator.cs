@@ -6,32 +6,31 @@ namespace AnarchyChess.Scripts.Games.Chess
 {
     public class ChessStandardValidator : IMoveValidator
     {
-        public bool Validate(Game game, Move foldedMove) => IsValidMove(game, foldedMove);
+        public bool Validate(Game game, AppliedMove foldedAppliedMove) => IsValidMove(game, foldedAppliedMove);
 
-        public static bool IsValidMove([NotNull] Game game, [NotNull] Move foldedMove)
+        public static bool IsValidMove([NotNull] Game game, [NotNull] AppliedMove foldedAppliedMove)
         {
-            if (!ValidateBounds(game, foldedMove)) return false;
-            if (!ValidateOverlap(game, foldedMove)) return false;
-            if (!ValidateMustTake(game, foldedMove)) return false;
-            if (!ValidateNoCheck(game, foldedMove)) return false;
+            if (!ValidateBounds(game, foldedAppliedMove)) return false;
+            if (!ValidateOverlap(game, foldedAppliedMove)) return false;
+            if (!ValidateMustTake(game, foldedAppliedMove)) return false;
+            if (!ValidateNoCheck(game, foldedAppliedMove)) return false;
 
             return true;
         }
 
-        public static bool ValidateBounds(Game game, Move foldedMove)
+        public static bool ValidateBounds(Game game, AppliedMove foldedAppliedMove)
         {
-            foreach (var move in foldedMove.Unfold())
+            foreach (var move in foldedAppliedMove.Unfold())
             {
-                if (move.To.X < 0 || move.To.X >= game.Board.Width) return false;
-                if (move.To.Y < 0 || move.To.Y >= game.Board.Height) return false;
+                if (!game.Board.IsInBounds(move.To)) return false;
             }
 
             return true;
         }
 
-        public static bool ValidateOverlap(Game game, Move foldedMove)
+        public static bool ValidateOverlap(Game game, AppliedMove foldedAppliedMove)
         {
-            foreach (var move in foldedMove.Unfold())
+            foreach (var move in foldedAppliedMove.Unfold())
             {
                 var movingPiece = game.Board[move.From];
                 if (movingPiece == null) return false;
@@ -46,9 +45,9 @@ namespace AnarchyChess.Scripts.Games.Chess
             return true;
         }
 
-        public static bool ValidateMustTake(Game game, Move foldedMove)
+        public static bool ValidateMustTake(Game game, AppliedMove foldedAppliedMove)
         {
-            foreach (var move in foldedMove.Unfold())
+            foreach (var move in foldedAppliedMove.Unfold())
             {
                 if (!move.IsMustTake) continue;
 
@@ -65,13 +64,13 @@ namespace AnarchyChess.Scripts.Games.Chess
             return true;
         }
 
-        public static bool ValidateNoCheck(Game game, Move foldedMove)
+        public static bool ValidateNoCheck(Game game, AppliedMove foldedAppliedMove)
         {
-            var originalPiece = game.Board[foldedMove.From];
+            var originalPiece = game.Board[foldedAppliedMove.From];
             if (originalPiece == null) return false;
             var gameClone = game.Clone();
 
-            gameClone.Board.InternalApplyMove(foldedMove);
+            gameClone.ApplyMove(foldedAppliedMove);
             var isValid = !ChessMateCheck.IsCheck(gameClone, originalPiece.Side);
             return isValid;
         }

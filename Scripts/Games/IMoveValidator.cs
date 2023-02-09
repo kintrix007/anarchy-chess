@@ -14,8 +14,8 @@ namespace AnarchyChess.Scripts.Games
         /// - the king does not end up in a check after the move <br/>
         /// </summary>
         /// <param name="game">The game being played</param>
-        /// <param name="foldedMove">The move to validate</param>
+        /// <param name="foldedAppliedMove">The move to validate</param>
         /// <returns>Whether the move is valid</returns>
-        bool Validate([NotNull] Game game, [NotNull] Move foldedMove);
+        bool Validate([NotNull] Game game, [NotNull] AppliedMove foldedAppliedMove);
     }
 }

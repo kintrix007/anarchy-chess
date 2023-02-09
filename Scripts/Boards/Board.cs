@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
@@ -95,22 +96,57 @@ namespace AnarchyChess.Scripts.Boards
         }
 
         /// <summary>
-        /// Apply the move with its follow-ups on the board.
+        /// Apply a move that is already split into steps.
+        /// They need to be split into only the origin and the destination. <br />
+        /// <br />
+        /// Now, this one has some quirks as it currently stands, so brace yourself: <br />
+        /// <br />
+        /// The callback is called _before_ a step is applied.
+        /// This is where the logic for capturing pieces could be handled. <br />
+        /// <br />
+        /// It is allowed for a piece to move on the same square as another one under the following conditions: <br />
+        ///   1. At most 2 pieces may stand on the same tile after any step of the move. <br />
+        ///   2. After the last step, every piece must stand on a unique tile. <br />
         /// </summary>
-        /// <param name="foldedMove"></param>
-        /// <exception cref="ArgumentException"></exception>
-        public void InternalApplyMove([NotNull] Move foldedMove)
+        /// <param name="steps">The already split up steps of a move</param>
+        /// <param name="beforeStepCallback">Function to be called before each step</param>
+        /// <exception cref="Exception">If some of the rules got violated</exception>
+        public void ApplySteps([NotNull] List<(Pos from, Pos to)> steps, Action<int, IPiece> beforeStepCallback)
         {
-            if (!IsInBounds(foldedMove.To)) throw new ArgumentException($"{foldedMove.To} is out of bounds");
+            var tmpPositions = new Dictionary<Pos, IPiece>();
 
-            var moveList = foldedMove.Unfold();
-            var movingPieces = new Dictionary<Move, IPiece>();
-            moveList.ForEach(move => movingPieces[move] = this[move.From]);
+            IPiece GetAt(Pos pos)
+            {
+                if (!tmpPositions.ContainsKey(pos)) return this[pos];
+                
+                var piece = tmpPositions[pos];
+                tmpPositions.Remove(pos);
+                return piece;
+            }
 
-            moveList.ForEach(move => {
-                this[move.To] = movingPieces[move];
-                this[move.From] = null;
-            });
+            void SetAt(Pos pos, IPiece piece)
+            {
+                if (this[pos] != null)
+                {
+                    if (tmpPositions[pos] != null) throw new Exception();
+                    tmpPositions[pos] = this[pos];
+                }
+
+                this[pos] = piece;
+            }
+            
+            foreach (var i in Enumerable.Range(0, steps.Count))
+            {
+                var (from, to) = steps[i];
+                var movingPiece = GetAt(from);
+                beforeStepCallback(i, movingPiece);
+
+                SetAt(to, movingPiece);
+                this[from] = null;
+                SetAt(from, GetAt(from)); // If there is a piece with a tmp pos, then put it on the board.
+            }
+
+            if (tmpPositions.Count != 0) throw new Exception();
         }
 
         /// <summary>
@@ -121,21 +157,15 @@ namespace AnarchyChess.Scripts.Boards
         public Board Clone()
         {
             var boardClone = new Board();
-            for (var y = 0; y < Height; y++)
+            foreach (var (pos, piece) in this)
             {
-                for (var x = 0; x < Width; x++)
-                {
-                    var piece = this[new Pos(x, y)];
-                    if (piece == null) continue;
+                var pieceCtor = piece.GetType().GetConstructor(new[] { typeof(Side) });
+                if (pieceCtor == null) throw new NullReferenceException();
 
-                    var pieceCtor = piece.GetType().GetConstructor(new[] { typeof(Side) });
-                    if (pieceCtor == null) throw new NullReferenceException();
+                var pieceClone = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
+                pieceClone.MoveCount = piece.MoveCount;
 
-                    var pieceClone = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
-                    pieceClone.MoveCount = piece.MoveCount;
-
-                    boardClone[new Pos(x, y)] = pieceClone;
-                }
+                boardClone[pos] = pieceClone;
             }
 
             return boardClone;

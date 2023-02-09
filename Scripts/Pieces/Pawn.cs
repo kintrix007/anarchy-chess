@@ -20,9 +20,9 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<Move> GetMoves(Game game, Pos pos)
+        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             moves.AddRange(NormalMove(game, pos));
             moves.AddRange(EnPassant(game, pos));
             
@@ -30,7 +30,7 @@ namespace AnarchyChess.Scripts.Pieces
             {
                 if (CheckPromotion(move))
                 {
-                    move.Promotes();
+                    move.PromoteTo(typeof(Queen));
                 }
             }
             
@@ -38,33 +38,33 @@ namespace AnarchyChess.Scripts.Pieces
         }
 
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
+        public static IEnumerable<AppliedMove> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
             var piece  = game.Board[pos];
-            var moves  = new List<Move>();
+            var moves  = new List<AppliedMove>();
             if (piece == null) return moves;
 
             var facing = piece.Side == Side.White ? 1 : -1;
-            moves.Add(Move.Relative(pos, new Pos(0, facing)));
+            moves.Add(AppliedMove.Relative(pos, new Pos(0, facing)));
 
             // Can go two tiles if it hasn't moved and there is nothing in front of it.
             if (piece.MoveCount == 0 && game.Board[pos.AddY(facing)] == null)
             {
-                moves.Add(Move.Relative(pos, new Pos(0, 2 * facing)));
+                moves.Add(AppliedMove.Relative(pos, new Pos(0, 2 * facing)));
             }
 
-            moves.Add(Move.Relative(pos, new Pos(-1, facing)).Must().Take());
-            moves.Add(Move.Relative(pos, new Pos(1, facing)).Must().Take());
+            moves.Add(AppliedMove.Relative(pos, new Pos(-1, facing)).Must().Take());
+            moves.Add(AppliedMove.Relative(pos, new Pos(1, facing)).Must().Take());
 
             return moves;
         }
 
         /// Defined in a way that it works even if the pawn did not start at the pawn base line
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> EnPassant([NotNull] Game game, [NotNull] Pos pos)
+        public static IEnumerable<AppliedMove> EnPassant([NotNull] Game game, [NotNull] Pos pos)
         {
-            var moves = new List<Move>();
-            if (game.LastMove == null) return moves;
+            var moves = new List<AppliedMove>();
+            if (game.LastAppliedMove == null) return moves;
 
             moves.AddRange(_InternalEnPassant(true, game, pos));
             moves.AddRange(_InternalEnPassant(false, game, pos));
@@ -72,10 +72,10 @@ namespace AnarchyChess.Scripts.Pieces
             return moves;
         }
 
-        private static IEnumerable<Move> _InternalEnPassant(bool isLeft, Game game, Pos pos)
+        private static IEnumerable<AppliedMove> _InternalEnPassant(bool isLeft, Game game, Pos pos)
         {
             var piece = game.Board[pos];
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             if (piece == null) return moves;
 
             var facing = piece.Side == Side.White ? 1 : -1;
@@ -85,11 +85,11 @@ namespace AnarchyChess.Scripts.Pieces
             if (!(game.Board[opponentPawnPos] is Pawn p)) return moves;
             if (p.Side == piece.Side) return moves;
             if (p.MoveCount != 1) return moves;
-            if (game.LastMove == null) return moves;
-            if (game.LastMove.To != opponentPawnPos) return moves;
-            if (game.LastMove.AsRelative.Abs() != new Pos(0, 2)) return moves;
+            if (game.LastAppliedMove == null) return moves;
+            if (game.LastAppliedMove.To != opponentPawnPos) return moves;
+            if (game.LastAppliedMove.AsRelative.Abs() != new Pos(0, 2)) return moves;
 
-            moves.Add(Move.Relative(pos, new Pos(direction, facing))
+            moves.Add(AppliedMove.Relative(pos, new Pos(direction, facing))
                 .AddTake(opponentPawnPos).Must());
 
             return moves;
@@ -97,9 +97,9 @@ namespace AnarchyChess.Scripts.Pieces
 
         //System for Promoting a pawn.
         //Hazel made this, it is ** garbage **
-        private static bool CheckPromotion(Move move)
+        private static bool CheckPromotion(AppliedMove appliedMove)
         {
-            if ((move.To.Y == 0) || (move.To.Y == 7))
+            if ((appliedMove.To.Y == 0) || (appliedMove.To.Y == 7))
             {
                 return true;
             }

@@ -19,9 +19,9 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        IEnumerable<Move> IPiece.GetMoves(Game game, Pos pos)
+        IEnumerable<AppliedMove> IPiece.GetMoves(Game game, Pos pos)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             moves.AddRange(NormalMove(game, pos));
             moves.AddRange(Castling(game, pos));
 
@@ -29,15 +29,15 @@ namespace AnarchyChess.Scripts.Pieces
         }
 
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
+        public static IEnumerable<AppliedMove> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             for (var x = -1; x <= 1; x++)
             {
                 for (var y = -1; y <= 1; y++)
                 {
                     if (x == 0 && y == 0) continue;
-                    moves.Add(Move.Relative(pos, new Pos(x, y)).Take());
+                    moves.Add(AppliedMove.Relative(pos, new Pos(x, y)).Take());
                 }
             }
 
@@ -46,10 +46,10 @@ namespace AnarchyChess.Scripts.Pieces
 
         //TODO Make it check so that you cannot castle through a line of attack
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> Castling([NotNull] Game game, [NotNull] Pos pos)
+        public static IEnumerable<AppliedMove> Castling([NotNull] Game game, [NotNull] Pos pos)
         {
             var piece = game.Board[pos];
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             if (piece.MoveCount > 0) return moves;
 
             moves.AddRange(_InternalCastle(true, game, pos));
@@ -60,25 +60,25 @@ namespace AnarchyChess.Scripts.Pieces
 
         //TODO rewrite it in a way that it does not matter where the castlable is.
         //TODO It should just be unmoved and in the same row/column.
-        private static IEnumerable<Move> _InternalCastle(bool isLeft, Game game, Pos pos)
+        private static IEnumerable<AppliedMove> _InternalCastle(bool isLeft, Game game, Pos pos)
         {
             var rookX = isLeft ? 0 : 7;
             var direction = isLeft ? -1 : 1;
             var castlable = game.Board[pos.SetX(rookX)];
-            if (!(castlable is ICastlable)) return new List<Move>();
-            if (castlable.MoveCount != 0) return new List<Move>();
+            if (!(castlable is ICastlable)) return new List<AppliedMove>();
+            if (castlable.MoveCount != 0) return new List<AppliedMove>();
 
             for (var x = pos.X + direction; x != rookX; x += direction)
             {
                 // Do not add the move if there are any pieces between the rook and the king
-                if (game.Board[pos.SetX(x)] != null) return new List<Move>();
+                if (game.Board[pos.SetX(x)] != null) return new List<AppliedMove>();
             }
 
             var newKingPos = pos.AddX(2 * direction);
-            var move = Move.Absolute(pos, newKingPos)
-                .AddFollowUp(Move.Absolute(pos.SetX(rookX), newKingPos.AddX(1 * -direction)));
+            var move = AppliedMove.Absolute(pos, newKingPos)
+                .AddFollowUp(AppliedMove.Absolute(pos.SetX(rookX), newKingPos.AddX(1 * -direction)));
 
-            return new List<Move> { move };
+            return new List<AppliedMove> { move };
         }
     }
 }

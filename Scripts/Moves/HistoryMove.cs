@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using Resource = Godot.Resource;
 
 namespace AnarchyChess.Scripts.Moves
@@ -7,5 +9,13 @@ namespace AnarchyChess.Scripts.Moves
     /// It should have a lot more convenience fields,
     /// such as what the moving piece is, what pieces it captured etc...
     /// </summary>
-    public class HistoryMove : Resource {}
+    public class HistoryMove : Resource
+    {
+        [NotNull] public readonly List<MoveStep> Steps;
+        
+        public HistoryMove([NotNull] AppliedMove move)
+        {
+            Steps = move.GetSteps();
+        }
+    }
 }
