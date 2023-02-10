@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Compatibility;
 using AnarchyChess.Scripts.Games;
@@ -20,14 +21,25 @@ namespace AnarchyChess.Objects.ChessBoard
         private readonly Tween _tween = new Tween();
         private GameManager _gameManager;
 
-        [NotNull] public readonly Dictionary<Pos, Control> PieceToControl = new Dictionary<Pos, Control>();
+        [NotNull] public readonly Dictionary<Pos, TextureRect> PieceToControl = new Dictionary<Pos, TextureRect>();
 
         public override void _Ready()
         {
             _piecesParent = GetNode("%Pieces");
             AddChild(_tween);
 
-            var (board, registry) = BoardTemplates.Standard();
+            // var (board, registry) = BoardTemplates.Standard();
+            var registry = new PieceToAscii()
+                .Register(typeof(King), 'K')
+                .Register(typeof(Pawn), 'P')
+                .Register(typeof(Knight), 'N')
+                .Register(typeof(Bishop), 'B')
+                .Register(typeof(Rook), 'R')
+                .Register(typeof(Queen), 'Q')
+                .Register(typeof(Knook), 'Ñ');
+            
+            // var board = "8/PPPPPPPP/4K3/8/8/4k3/pppppppp/8".ParseBoard(registry);
+            var board = "ñnbqkbnñ/pppppppp/8/8/8/8/PPPPPPPP/ÑNBQKBNÑ".ParseBoard(registry);
             var game = new Game(board, registry: registry);
             _gameManager = new GameManager(game)
                 .SetDefaultTexturePath("res://icon.png")
@@ -41,8 +53,6 @@ namespace AnarchyChess.Objects.ChessBoard
                 .Manage(this);
             game.Create();
 
-            game.Board.RemovePiece(new Pos("A1"));
-            game.Board.AddPiece(new Pos("A1"), new Knook(Side.White));
             GD.Randomize();
         }
 
@@ -54,7 +64,7 @@ namespace AnarchyChess.Objects.ChessBoard
             _time += delta;
             if (_time > 0.5)
             {
-                var moves = _gameManager.Game.GetAllValidMoves(_last).ToList();
+                var moves = _gameManager.Game.GetAllMoves(_last).Where(_gameManager.Game.IsValidMove).ToList();
                 if (ChessMateCheck.IsMate(_gameManager.Game, _last))
                 {
                     GD.Print("_ Mate.");
@@ -89,17 +99,17 @@ namespace AnarchyChess.Objects.ChessBoard
             }
         }
 
-        public void OnPieceMoved(Game game, AppliedMove appliedMove)
+        public void OnPieceMoved(Game game, MoveStep step)
         {
-            var pos = appliedMove.To;
-            var piece = PieceToControl[appliedMove.From];
-            PieceToControl[pos] = piece;
-            PieceToControl.Remove(appliedMove.From);
+            var pos = step.To;
+            var pieceNode = PieceToControl[step.From];
+            PieceToControl[pos] = pieceNode;
+            PieceToControl.Remove(step.From);
 
             var worldPosition = MapToWorld(PosToBoardVector2(game, pos));
 
             _tween.InterpolateProperty(
-                piece, "rect_position",
+                pieceNode, "rect_position",
                 null, worldPosition,
                 0.3f, Tween.TransitionType.Cubic, Tween.EaseType.Out
             );
@@ -107,14 +117,26 @@ namespace AnarchyChess.Objects.ChessBoard
             _tween.Start();
         }
 
-        public void OnPieceRemoved(Game game, Pos pos, Object piece)
+        public void OnPiecePromoted(Game game, MoveStep step, Object piece)
         {
-            if (!PieceToControl.ContainsKey(pos)) return;
-            var boardPiece = PieceToControl[pos];
-            boardPiece.QueueFree();
-            PieceToControl.Remove(pos);
-        }
+            var pos = step.To;
+            var pieceNode = PieceToControl[step.From];
+            PieceToControl[pos] = pieceNode;
+            PieceToControl.Remove(step.From);
 
+            var worldPosition = MapToWorld(PosToBoardVector2(game, pos));
+
+            _tween.InterpolateProperty(
+                pieceNode, "rect_position",
+                null, worldPosition,
+                0.3f, Tween.TransitionType.Cubic, Tween.EaseType.Out
+            );
+
+            Task.Delay(300).ContinueWith(_ => pieceNode.Texture = _gameManager.GetTexture((IPiece)piece));
+
+            _tween.Start();
+        }
+        
         public void OnPieceAdded(Game game, Pos pos, Object piece)
         {
             var tex = new TextureRect();
@@ -125,6 +147,14 @@ namespace AnarchyChess.Objects.ChessBoard
             PieceToControl[pos] = tex;
         }
 
+        public void OnPieceRemoved(Game game, Pos pos, Object piece)
+        {
+            if (!PieceToControl.ContainsKey(pos)) return;
+            var boardPiece = PieceToControl[pos];
+            boardPiece.QueueFree();
+            PieceToControl.Remove(pos);
+        }
+        
         private static Vector2 PosToBoardVector2([NotNull] Game game, [NotNull] Pos pos)
         {
             var translatedPos = pos.SetY(game.Board.Height - 1 - pos.Y);

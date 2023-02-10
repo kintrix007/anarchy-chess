@@ -8,70 +8,63 @@ namespace AnarchyChess.Scripts.Games.Chess
     {
         public bool Validate(Game game, AppliedMove foldedAppliedMove) => IsValidMove(game, foldedAppliedMove);
 
-        public static bool IsValidMove([NotNull] Game game, [NotNull] AppliedMove foldedAppliedMove)
+        public static bool IsValidMove([NotNull] Game game, [NotNull] AppliedMove move)
         {
-            if (!ValidateBounds(game, foldedAppliedMove)) return false;
-            if (!ValidateOverlap(game, foldedAppliedMove)) return false;
-            if (!ValidateMustTake(game, foldedAppliedMove)) return false;
-            if (!ValidateNoCheck(game, foldedAppliedMove)) return false;
+            if (!ValidateBounds(game, move)) return false;
+            if (!ValidateOverlap(game, move)) return false;
+            if (!ValidateMustTake(game, move)) return false;
+            if (!ValidateNoCheck(game, move)) return false;
 
             return true;
         }
 
-        public static bool ValidateBounds(Game game, AppliedMove foldedAppliedMove)
+        public static bool ValidateBounds(Game game, AppliedMove move)
         {
-            foreach (var move in foldedAppliedMove.Unfold())
+            foreach (var step in move.GetSteps())
             {
-                if (!game.Board.IsInBounds(move.To)) return false;
+                if (!game.Board.IsInBounds(step.To)) return false;
             }
 
             return true;
         }
 
-        public static bool ValidateOverlap(Game game, AppliedMove foldedAppliedMove)
+        public static bool ValidateOverlap(Game game, AppliedMove move)
         {
-            foreach (var move in foldedAppliedMove.Unfold())
+            foreach (var step in move.GetSteps())
             {
-                var movingPiece = game.Board[move.From];
+                var movingPiece = game.Board[step.From];
                 if (movingPiece == null) return false;
 
-                var destPiece = game.Board[move.To];
+                var destPiece = game.Board[step.To];
                 if (destPiece == null) continue;
 
                 if (destPiece.Side == movingPiece.Side) return false;
-                if (!move.TakeList.Contains(move.To)) return false;
+                if (!move.TakeList.Contains(step.To)) return false;
             }
 
             return true;
         }
 
-        public static bool ValidateMustTake(Game game, AppliedMove foldedAppliedMove)
+        public static bool ValidateMustTake(Game game, AppliedMove move)
         {
-            foreach (var move in foldedAppliedMove.Unfold())
-            {
-                if (!move.IsMustTake) continue;
+            if (!move.MustTake) return true;
+            var firstPiece = game.Board[move.GetSteps()[0].From];
+            if (firstPiece == null) return false;
 
-                var movingPiece = game.Board[move.From];
-                if (movingPiece == null) return false;
+            var takesAll = move.TakeList
+                .All(x => game.Board[x] != null && game.Board[x].Side != firstPiece.Side);
 
-                var takesAll = move.TakeList.All(
-                    x => game.Board[x] != null && game.Board[x].Side != movingPiece.Side
-                );
-
-                if (!takesAll) return false;
-            }
-
-            return true;
+            return takesAll;
         }
 
-        public static bool ValidateNoCheck(Game game, AppliedMove foldedAppliedMove)
+        public static bool ValidateNoCheck(Game game, AppliedMove move)
         {
-            var originalPiece = game.Board[foldedAppliedMove.From];
-            if (originalPiece == null) return false;
+            var firstPiece = game.Board[move.GetSteps()[0].From];
+            if (firstPiece == null) return false;
             var gameClone = game.Clone();
 
-            gameClone.ApplyMove(foldedAppliedMove);
-            var isValid = !ChessMateCheck.IsCheck(gameClone, originalPiece.Side);
+            gameClone.ApplyMove(move);
+            var isValid = !ChessMateCheck.IsCheck(gameClone, firstPiece.Side);
             return isValid;
         }
     }

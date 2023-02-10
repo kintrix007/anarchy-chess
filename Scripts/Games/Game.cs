@@ -8,6 +8,7 @@ using AnarchyChess.Scripts.PieceHelper;
 using JetBrains.Annotations;
 using Object = Godot.Object;
 using Resource = Godot.Resource;
+using Signal = Godot.SignalAttribute;
 
 namespace AnarchyChess.Scripts.Games
 {
@@ -16,19 +17,22 @@ namespace AnarchyChess.Scripts.Games
     /// </summary>
     public class Game : Resource
     {
-        [Godot.Signal]
+        [Signal]
         public delegate void GameCreated([NotNull] Game game);
 
-        [Godot.Signal]
+        [Signal]
         public delegate void PieceMoved([NotNull] Game game, [NotNull] MoveStep step);
 
         // Cannot use interface types (like `IPiece`) in signal signatures...
-        [Godot.Signal]
+        [Signal]
         public delegate void PieceRemoved([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
 
-        [Godot.Signal]
+        [Signal]
         public delegate void PieceAdded([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
 
+        [Signal]
+        public delegate void PiecePromoted([NotNull] Game game, [NotNull] MoveStep step, [NotNull] Object piece);
+        
         [NotNull] public readonly PieceToAscii PieceToAsciiRegistry;
 
         /// <summary>
@@ -57,7 +61,7 @@ namespace AnarchyChess.Scripts.Games
         /// The last move of the game.
         /// </summary>
         [CanBeNull]
-        public HistoryMove LastAppliedMove => MoveHistory.Count <= 0 ? null : MoveHistory.Last();
+        public HistoryMove LastMove => MoveHistory.Count <= 0 ? null : MoveHistory.Last();
 
         /// <summary>
         /// Should never be used, but Godot is complaining about the lack of its existence.
@@ -83,9 +87,6 @@ namespace AnarchyChess.Scripts.Games
                 { Side.White, 0 },
                 { Side.Black, 0 },
             };
-
-            board.Connect(nameof(Board.PieceAdded), this, nameof(OnPieceAdded));
-            board.Connect(nameof(Board.PieceRemoved), this, nameof(OnPieceRemoved));
         }
 
         /// <summary>
@@ -96,6 +97,20 @@ namespace AnarchyChess.Scripts.Games
             EmitSignal(nameof(GameCreated), this);
         }
 
+        [CanBeNull]
+        public IPiece RemovePiece([NotNull] Pos pos)
+        {
+            var piece = Board.RemovePiece(pos);
+            if (piece != null) EmitSignal(nameof(PieceRemoved), this, pos, piece);
+            return piece;
+        }
+        
+        public void AddPiece([NotNull] Pos pos, [NotNull] IPiece piece)
+        {
+            Board.AddPiece(pos, piece);
+            EmitSignal(nameof(PieceAdded), this, pos, piece);
+        }
+        
         /// <summary>
         /// Execute a move in the game.
         /// </summary>
@@ -104,28 +119,26 @@ namespace AnarchyChess.Scripts.Games
         public void ApplyMove([NotNull] AppliedMove move)
         {
             var steps = move.GetSteps();
-            var stepTuples = steps.Select(x => (x.From, x.To)).ToList();
             
-            Board.ApplySteps(stepTuples, (i, piece) => {
-                var step = steps[i];
+            var taken = move.TakeList.Select(RemovePiece).Where(x => x != null).ToList();
+            taken.ForEach(x => Scores[x.Side] += x.Cost);
+            
+            Board.ApplySteps(steps, (piece, step) => {
                 piece.MoveCount++;
-                var taken = step.TakeList.Select(Board.RemovePiece).Where(x => x != null).ToList();
-                taken.ForEach(x => Scores[x.Side] += x.Cost);
 
                 if (step.PromotesTo == null)
                 {
-                    //? Not sure if this is a good idea, as now we emit the move signal before the piece is actually moved.
                     EmitSignal(nameof(PieceMoved), this, step);
+                    return;
                 }
-                else
-                {
-                    var pieceCtor = step.PromotesTo.GetConstructor(new[] { typeof(Side) });
-                    if (pieceCtor == null) throw new NullReferenceException();
-                    var promoted = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
+                
+                var pieceCtor = step.PromotesTo.GetConstructor(new[] { typeof(Side) });
+                if (pieceCtor == null) throw new NullReferenceException();
+                var promoted = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
 
-                    Board.RemovePiece(step.From);
-                    Board.AddPiece(step.To, promoted);
-                }
+                Board.ReplacePiece(step.To, promoted);
+                EmitSignal(nameof(PiecePromoted), this, step, promoted);
+
             });
             
             MoveHistory.Add(new HistoryMove(move));
@@ -180,16 +193,6 @@ namespace AnarchyChess.Scripts.Games
             gameClone.Scores[Side.Black] = Scores[Side.Black];
 
             return gameClone;
-        }
-
-        private void OnPieceAdded([NotNull] Pos pos, [NotNull] Object piece)
-        {
-            EmitSignal(nameof(PieceAdded), this, pos, piece);
-        }
-
-        private void OnPieceRemoved([NotNull] Pos pos, [NotNull] Object piece)
-        {
-            EmitSignal(nameof(PieceRemoved), this, pos, piece);
         }
     }
 }

@@ -18,9 +18,9 @@ namespace AnarchyChess.Scripts.Moves
         
         [NotNull] private readonly Pos _to;
         
-        [NotNull, ItemNotNull] private readonly List<Pos> _takeList;
+        [NotNull, ItemNotNull] public readonly List<Pos> TakeList;
         
-        private bool _mustTake;
+        public bool MustTake { get; private set; }
         
         [CanBeNull] private Type _promotesTo;
         
@@ -51,8 +51,8 @@ namespace AnarchyChess.Scripts.Moves
         [NotNull]
         public AppliedMove Take(bool isTake = true)
         {
-            if (isTake) _takeList.Add(_to);
-            else        _takeList.Remove(_to);
+            if (isTake) TakeList.Add(_to);
+            else        TakeList.Remove(_to);
             return this;
         }
 
@@ -63,7 +63,7 @@ namespace AnarchyChess.Scripts.Moves
         [NotNull]
         public AppliedMove Must(bool isMust = true)
         {
-            _mustTake = isMust;
+            MustTake = isMust;
             return this;
         }
 
@@ -95,6 +95,10 @@ namespace AnarchyChess.Scripts.Moves
         public AppliedMove AddFollowUp([NotNull] AppliedMove appliedMove)
         {
             _followUp = appliedMove;
+            if (_followUp.TakeList.Count != 0)
+            {
+                throw new ArgumentException("The follow-up moves must not specify take lists.");
+            }
             return this;
         }
 
@@ -106,7 +110,7 @@ namespace AnarchyChess.Scripts.Moves
         [NotNull]
         public AppliedMove AddTake([NotNull, ItemNotNull] params Pos[] to)
         {
-            _takeList.AddRange(to);
+            TakeList.AddRange(to);
             return this;
         }
 
@@ -122,9 +126,9 @@ namespace AnarchyChess.Scripts.Moves
             var move = this;
             while (move != null)
             {
-                var step = new MoveStep(move._from, move._to, move._takeList, move._mustTake, move._promotesTo);
+                var step = new MoveStep(move._from, move._to, move._promotesTo);
                 steps.Add(step);
-                move = _followUp;
+                move = move._followUp;
             }
 
             return steps;
@@ -158,8 +162,8 @@ namespace AnarchyChess.Scripts.Moves
         {
             _from = from;
             _to = to;
-            _takeList = new List<Pos>();
-            _mustTake = false;
+            TakeList = new List<Pos>();
+            MustTake = false;
             _followUp = null;
             _promotesTo = null;
         }
@@ -169,8 +173,8 @@ namespace AnarchyChess.Scripts.Moves
         private static AppliedMove InvertParams(AppliedMove appliedMove)
         {
             var inverse = new AppliedMove(appliedMove._to, appliedMove._from);
-            if (appliedMove._mustTake) inverse.Must();
-            appliedMove._takeList.ForEach(x => inverse.AddTake(x));
+            if (appliedMove.MustTake) inverse.Must();
+            appliedMove.TakeList.ForEach(x => inverse.AddTake(x));
             return inverse;
         }
     }

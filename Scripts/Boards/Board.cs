@@ -2,27 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using JetBrains.Annotations;
-using Signal = Godot.SignalAttribute;
 using Resource = Godot.Resource;
-using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Boards
 {
     /// <summary>
-    /// Object to hold all the pieces.
+    /// Object to hold all the pieces on their corresponding position.
     /// </summary>
     public class Board : Resource, IEnumerable<(Pos pos, IPiece piece)>
     {
-        [Signal]
-        public delegate void PieceAdded([NotNull] Pos pos, [NotNull] Object piece);
-
-        [Signal]
-        public delegate void PieceRemoved([NotNull] Pos pos, [NotNull] Object piece);
-
         [NotNull, ItemCanBeNull] private readonly IPiece[,] _pieces;
 
         //TODO Actually take these values into consideration after making them public.
@@ -71,8 +62,6 @@ namespace AnarchyChess.Scripts.Boards
         public void AddPiece([NotNull] Pos pos, [NotNull] IPiece piece)
         {
             if (this[pos] != null) throw new ArgumentException($"There is already a piece at {pos}");
-
-            EmitSignal(nameof(Game.PieceAdded), pos, (Object)piece);
             this[pos] = piece;
         }
 
@@ -87,66 +76,78 @@ namespace AnarchyChess.Scripts.Boards
             var piece = this[pos];
             this[pos] = null;
 
-            if (piece != null)
-            {
-                EmitSignal(nameof(Game.PieceRemoved), pos, (Object)piece);
-            }
-
             return piece;
         }
 
+        public void ReplacePiece([NotNull] Pos pos, [NotNull] IPiece with)
+        {
+            if (this[pos] == null) throw new ArgumentException($"There is no piece to replace at {pos}");
+            this[pos] = with;
+        }
+        
         /// <summary>
-        /// Apply a move that is already split into steps.
-        /// They need to be split into only the origin and the destination. <br />
+        /// Apply a move that is already split into steps.<br />
         /// <br />
         /// Now, this one has some quirks as it currently stands, so brace yourself: <br />
         /// <br />
-        /// The callback is called _before_ a step is applied.
-        /// This is where the logic for capturing pieces could be handled. <br />
+        /// The callback is called after a step is applied.
+        /// This is where the move counter could be implemented etc. <br />
         /// <br />
         /// It is allowed for a piece to move on the same square as another one under the following conditions: <br />
         ///   1. At most 2 pieces may stand on the same tile after any step of the move. <br />
         ///   2. After the last step, every piece must stand on a unique tile. <br />
         /// </summary>
         /// <param name="steps">The already split up steps of a move</param>
-        /// <param name="beforeStepCallback">Function to be called before each step</param>
+        /// <param name="afterStepCallback">Function to be called after each step</param>
         /// <exception cref="Exception">If some of the rules got violated</exception>
-        public void ApplySteps([NotNull] List<(Pos from, Pos to)> steps, Action<int, IPiece> beforeStepCallback)
+        public void ApplySteps([NotNull] List<MoveStep> steps, Action<IPiece, MoveStep> afterStepCallback)
         {
             var tmpPositions = new Dictionary<Pos, IPiece>();
 
-            IPiece GetAt(Pos pos)
-            {
-                if (!tmpPositions.ContainsKey(pos)) return this[pos];
-                
-                var piece = tmpPositions[pos];
-                tmpPositions.Remove(pos);
-                return piece;
-            }
+            IPiece GetAt(Pos pos) => tmpPositions.ContainsKey(pos) ? tmpPositions[pos] : this[pos];
 
             void SetAt(Pos pos, IPiece piece)
             {
                 if (this[pos] != null)
                 {
-                    if (tmpPositions[pos] != null) throw new Exception();
+                    if (tmpPositions.ContainsKey(pos))
+                    {
+                        throw new Exception("There are more than 2 overlapping pieces.");
+                    }
                     tmpPositions[pos] = this[pos];
                 }
 
                 this[pos] = piece;
             }
-            
-            foreach (var i in Enumerable.Range(0, steps.Count))
-            {
-                var (from, to) = steps[i];
-                var movingPiece = GetAt(from);
-                beforeStepCallback(i, movingPiece);
 
-                SetAt(to, movingPiece);
-                this[from] = null;
-                SetAt(from, GetAt(from)); // If there is a piece with a tmp pos, then put it on the board.
+            void PopPossible()
+            {
+                var toRemove = new List<Pos>();
+                
+                foreach (var pair in tmpPositions.Where(pair => this[pair.Key] == null))
+                {
+                    this[pair.Key] = pair.Value;
+                    toRemove.Add(pair.Key);
+                }
+                
+                toRemove.ForEach(x => tmpPositions.Remove(x));
+            }
+            
+            foreach (var step in steps)
+            {
+                var movingPiece = GetAt(step.From);
+                
+                SetAt(step.To, movingPiece);
+                this[step.From] = null;
+                PopPossible();
+
+                afterStepCallback(movingPiece, step);
             }
 
-            if (tmpPositions.Count != 0) throw new Exception();
+            if (tmpPositions.Count != 0)
+            {
+                throw new Exception("There are overlapping pieces at the end of the move.");
+            }
         }
 
         /// <summary>

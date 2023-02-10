@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
@@ -13,6 +15,9 @@ namespace AnarchyChess.Scripts.Pieces
         public int Cost => 1;
         public Side Side { get; }
         public int MoveCount { get; set; }
+        public List<Type> Promotions =>
+            new List<Type>{ typeof(Queen), typeof(Rook), typeof(Knight), typeof(Bishop), typeof(Knook) };
+
 
         public Pawn(Side side)
         {
@@ -25,15 +30,13 @@ namespace AnarchyChess.Scripts.Pieces
             var moves = new List<AppliedMove>();
             moves.AddRange(NormalMove(game, pos));
             moves.AddRange(EnPassant(game, pos));
-            
-            foreach (var move in moves)
+
+            //TODO Instead generate all possible promotion moves
+            foreach (var move in moves.Where(IsPromotion))
             {
-                if (CheckPromotion(move))
-                {
-                    move.PromoteTo(typeof(Queen));
-                }
+                move.PromoteTo(Promotions[Math.Abs((int)GD.Randi()) % Promotions.Count]);
             }
-            
+
             return moves.ToArray();
         }
 
@@ -64,7 +67,7 @@ namespace AnarchyChess.Scripts.Pieces
         public static IEnumerable<AppliedMove> EnPassant([NotNull] Game game, [NotNull] Pos pos)
         {
             var moves = new List<AppliedMove>();
-            if (game.LastAppliedMove == null) return moves;
+            if (game.LastMove == null) return moves;
 
             moves.AddRange(_InternalEnPassant(true, game, pos));
             moves.AddRange(_InternalEnPassant(false, game, pos));
@@ -85,9 +88,12 @@ namespace AnarchyChess.Scripts.Pieces
             if (!(game.Board[opponentPawnPos] is Pawn p)) return moves;
             if (p.Side == piece.Side) return moves;
             if (p.MoveCount != 1) return moves;
-            if (game.LastAppliedMove == null) return moves;
-            if (game.LastAppliedMove.To != opponentPawnPos) return moves;
-            if (game.LastAppliedMove.AsRelative.Abs() != new Pos(0, 2)) return moves;
+            if (game.LastMove == null) return moves;
+            if (game.LastMove.Steps.Count != 1) return moves;
+            var lastStep = game.LastMove.Steps[0];
+
+            if (lastStep.To != opponentPawnPos) return moves;
+            if (lastStep.Offset.Abs() != new Pos(0, 2)) return moves;
 
             moves.Add(AppliedMove.Relative(pos, new Pos(direction, facing))
                 .AddTake(opponentPawnPos).Must());
@@ -95,16 +101,13 @@ namespace AnarchyChess.Scripts.Pieces
             return moves;
         }
 
-        //System for Promoting a pawn.
-        //Hazel made this, it is ** garbage **
-        private static bool CheckPromotion(AppliedMove appliedMove)
+        private static bool IsPromotion(AppliedMove appliedMove)
         {
-            if ((appliedMove.To.Y == 0) || (appliedMove.To.Y == 7))
-            {
-                return true;
-            }
+            var steps = appliedMove.GetSteps();
+            if (steps.Count != 1) return false;
 
-            return false;
+            var step = steps[0];
+            return step.To.Y == 0 || step.To.Y == 7;
         }
     }
 }

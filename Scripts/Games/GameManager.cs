@@ -79,6 +79,7 @@ namespace AnarchyChess.Scripts.Games
 
             ConnectSignal(nameof(Game.GameCreated),  obj, nameof(managedGame.OnGameCreated));
             ConnectSignal(nameof(Game.PieceMoved),   obj, nameof(managedGame.OnPieceMoved));
+            ConnectSignal(nameof(Game.PiecePromoted), obj, nameof(managedGame.OnPiecePromoted));
             ConnectSignal(nameof(Game.PieceAdded),   obj, nameof(managedGame.OnPieceAdded));
             ConnectSignal(nameof(Game.PieceRemoved), obj, nameof(managedGame.OnPieceRemoved));
             return this;
