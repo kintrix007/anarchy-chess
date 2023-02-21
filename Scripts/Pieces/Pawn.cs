@@ -31,11 +31,10 @@ namespace AnarchyChess.Scripts.Pieces
             moves.AddRange(NormalMove(game, pos));
             moves.AddRange(EnPassant(game, pos));
 
-            //TODO Instead generate all possible promotion moves
-            foreach (var move in moves.Where(IsPromotion))
-            {
-                move.PromoteTo(Promotions[Math.Abs((int)GD.Randi()) % Promotions.Count]);
-            }
+            moves = moves.SelectMany(x => {
+                if (IsPromotion(x)) return Promotions.Select(p => x.Clone().PromoteTo(p));
+                return new[] { x };
+            }).ToList();
 
             return moves.ToArray();
         }
