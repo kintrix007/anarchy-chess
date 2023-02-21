@@ -153,18 +153,6 @@ namespace AnarchyChess.Scripts.Moves
 
         public override string ToString() => $"Move({_from} -> {_to})";
 
-        /* --- Protected --- */
-
-        protected AppliedMove([NotNull] Pos from, [NotNull] Pos to)
-        {
-            _from = from;
-            _to = to;
-            TakeList = new List<Pos>();
-            MustTake = false;
-            _followUp = null;
-            _promotesTo = null;
-        }
-
         /// <summary>
         /// Performs a deep copy of this move.
         /// </summary>
@@ -177,6 +165,18 @@ namespace AnarchyChess.Scripts.Moves
 
             if (MustTake) move.Must();
             return move;
+        }
+        
+        /* --- Protected --- */
+
+        protected AppliedMove([NotNull] Pos from, [NotNull] Pos to)
+        {
+            _from = from;
+            _to = to;
+            TakeList = new List<Pos>();
+            MustTake = false;
+            _followUp = null;
+            _promotesTo = null;
         }
 
         /* --- Private --- */
