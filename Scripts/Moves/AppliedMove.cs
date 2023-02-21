@@ -168,6 +168,16 @@ namespace AnarchyChess.Scripts.Moves
             _promotesTo = null;
         }
 
+        /// <summary>
+        /// Performs a deep copy of this move.
+        /// </summary>
+        /// <returns></returns>
+        public AppliedMove Clone()
+        {
+            var steps = GetSteps().Select(x => x.Clone()).ToList();
+            return AppliedMove.Fold(steps);
+        }
+
         /* --- Private --- */
 
         private static AppliedMove InvertParams(AppliedMove appliedMove)
