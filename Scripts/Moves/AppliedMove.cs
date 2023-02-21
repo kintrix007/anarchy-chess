@@ -14,16 +14,13 @@ namespace AnarchyChess.Scripts.Moves
     /// </summary>
     public class AppliedMove : Resource
     {
-        [NotNull] private readonly Pos _from;
-        
-        [NotNull] private readonly Pos _to;
-        
         [NotNull, ItemNotNull] public readonly List<Pos> TakeList;
         
         public bool MustTake { get; private set; }
         
+        [NotNull] private readonly Pos _from;
+        [NotNull] private readonly Pos _to;
         [CanBeNull] private Type _promotesTo;
-        
         [CanBeNull] private AppliedMove _followUp;
 
         /// <summary>
@@ -175,7 +172,11 @@ namespace AnarchyChess.Scripts.Moves
         public AppliedMove Clone()
         {
             var steps = GetSteps().Select(x => x.Clone()).ToList();
-            return AppliedMove.Fold(steps);
+            var move = AppliedMove.Fold(steps)
+                .AddTake(TakeList.Select(x => x.Clone()).ToArray());
+
+            if (MustTake) move.Must();
+            return move;
         }
 
         /* --- Private --- */
