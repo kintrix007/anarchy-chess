@@ -50,6 +50,7 @@ namespace AnarchyChess.Scripts.Pieces
         {
             var piece = game.Board[pos];
             var moves = new List<Move>();
+            if (piece == null) return moves;
             if (piece.MoveCount > 0) return moves;
 
             moves.AddRange(_InternalCastle(true, game, pos));
