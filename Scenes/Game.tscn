@@ -25,6 +25,7 @@ __meta__ = {
 unique_name_in_owner = true
 margin_left = -720.0
 margin_right = -972.0
+max_width = 650.0
 
 [node name="MainPanel" type="PanelContainer" parent="."]
 anchor_right = 1.0
