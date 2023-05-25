@@ -11,6 +11,13 @@ namespace AnarchyChess.Scripts.Boards
     public static class BoardParser
     {
         //TODO PLEASE clean up this mess. I beg you.
+        /**
+         * Parse a chess string into a board state. It is a modified version of it,
+         * which only contains the piece positions -- for now.
+         * This is subject to change.
+         * <param name="template">The chess string</param>
+         * <param name="registry">Registry to describe what character means which piece</param>
+         */
         public static Board ParseBoard(this string template, [NotNull] PieceToAscii registry)
         {
             var board = new Board();
@@ -44,7 +51,11 @@ namespace AnarchyChess.Scripts.Boards
             return board;
         }
 
-        public static string DumpTemplate(this Board board, [NotNull] PieceToAscii registry)
+        /**
+         * Create a visual ascii representation of the board state. This is at
+         * best for debugging purposes
+         */
+        public static string CreateDebugChessString(this Board board, [NotNull] PieceToAscii registry)
         {
             var pieceStrings = new string[board.Height][];
 
