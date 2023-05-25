@@ -97,6 +97,11 @@ namespace AnarchyChess.Scripts.Games
             EmitSignal(nameof(GameCreated), this);
         }
 
+        /// <summary>
+        /// Remove a piece from the board at a given position. After removing it, return it.
+        /// </summary>
+        /// <param name="pos">The position to remove it at</param>
+        /// <returns>The removed piece</returns>
         [CanBeNull]
         public IPiece RemovePiece([NotNull] Pos pos)
         {
