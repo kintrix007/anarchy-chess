@@ -58,8 +58,8 @@ namespace AnarchyChess.Scripts.Pieces
             return moves;
         }
 
-        //TODO rewrite it in a way that it does not matter where the castlable is.
-        //TODO It should just be unmoved and in the same row/column.
+        //TODO Rewrite it in a way that it does not matter where the castlable is.
+        // It should just be unmoved and in the same row/column.
         private static IEnumerable<AppliedMove> _InternalCastle(bool isLeft, Game game, Pos pos)
         {
             var rookX = isLeft ? 0 : 7;
