@@ -99,7 +99,7 @@ namespace AnarchyChess.Boards
         {
             var tmpPositions = new Dictionary<Pos, IPiece>();
 
-            IPiece GetAt(Pos pos) => tmpPositions.ContainsKey(pos) ? tmpPositions[pos] : this[pos];
+            IPiece? GetAt(Pos pos) => tmpPositions.ContainsKey(pos) ? tmpPositions[pos] : this[pos];
 
             void SetAt(Pos pos, IPiece piece)
             {
@@ -109,7 +109,7 @@ namespace AnarchyChess.Boards
                     {
                         throw new Exception("There are more than 2 overlapping pieces.");
                     }
-                    tmpPositions[pos] = this[pos];
+                    tmpPositions[pos] = this[pos]!;
                 }
 
                 this[pos] = piece;
@@ -131,7 +131,8 @@ namespace AnarchyChess.Boards
             foreach (var step in steps)
             {
                 var movingPiece = GetAt(step.From);
-                
+                if (movingPiece == null) throw new Exception("Attempted to a piece but it was null");
+
                 SetAt(step.To, movingPiece);
                 this[step.From] = null;
                 PopPossible();

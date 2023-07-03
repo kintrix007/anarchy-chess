@@ -30,7 +30,8 @@ namespace AnarchyChess.PieceHelper
         /// <param name="game">The game being played</param>
         /// <param name="pos">The current position of the piece</param>
         /// <returns>The moves the piece can make</returns>
-        
         IEnumerable<AppliedMove> GetMoves(Game game, Pos pos);
+
+        IEnumerable<AppliedMove> NormalMove(Game game, Pos pos);
     }
 }

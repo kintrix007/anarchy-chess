@@ -20,11 +20,11 @@ namespace AnarchyChess.Pieces
         public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
 
         
-        public static IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
+        public IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
         {
             var moves = new List<AppliedMove>();
-            moves.AddRange(Rook.NormalMove(game, pos));
-            moves.AddRange(Bishop.NormalMove(game, pos));
+            moves.AddRange(new Rook(Side).NormalMove(game, pos));
+            moves.AddRange(new Bishop(Side).NormalMove(game, pos));
 
             return moves;
         }

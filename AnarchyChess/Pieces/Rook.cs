@@ -21,7 +21,7 @@ namespace AnarchyChess.Pieces
         public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
 
         
-        public static IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
+        public IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
         {
             var moves = new List<AppliedMove>();
 

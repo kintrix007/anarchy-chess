@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using AnarchyChess.Boards;
 using AnarchyChess.Games;
 using AnarchyChess.Moves;
@@ -14,7 +15,7 @@ namespace AnarchyChess.Pieces
         public Side Side { get; }
         public int MoveCount { get; set; }
         public List<Type> Promotions =>
-            new List<Type>{ typeof(Queen), typeof(Rook), typeof(Knight), typeof(Bishop), typeof(Knook) };
+            new() { typeof(Queen), typeof(Rook), typeof(Knight), typeof(Bishop), typeof(Knook) };
 
 
         public Pawn(Side side)
@@ -29,26 +30,24 @@ namespace AnarchyChess.Pieces
             moves.AddRange(NormalMove(game, pos));
             moves.AddRange(EnPassant(game, pos));
 
-            moves = moves.SelectMany(x => {
+            moves = moves.SelectMany(x =>
+            {
                 if (IsPromotion(x)) return Promotions.Select(p => x.Clone().PromoteTo(p));
                 return new[] { x };
             }).ToList();
 
-            return moves.ToArray();
+            return moves;
         }
 
-        
-        public static IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
+        public IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
         {
-            var piece  = game.Board[pos];
-            var moves  = new List<AppliedMove>();
-            if (piece == null) return moves;
+            var moves = new List<AppliedMove>();
 
-            var facing = piece.Side == Side.White ? 1 : -1;
+            var facing = this.Side == Side.White ? 1 : -1;
             moves.Add(AppliedMove.Relative(pos, new Pos(0, facing)));
 
             // Can go two tiles if it hasn't moved and there is nothing in front of it.
-            if (piece.MoveCount == 0 && game.Board[pos.AddY(facing)] == null)
+            if (this.MoveCount == 0 && game.Board[pos.AddY(facing)] == null)
             {
                 moves.Add(AppliedMove.Relative(pos, new Pos(0, 2 * facing)));
             }
@@ -60,19 +59,19 @@ namespace AnarchyChess.Pieces
         }
 
         /// Defined in a way that it works even if the pawn did not start at the pawn base line
-        
+
         public static IEnumerable<AppliedMove> EnPassant(Game game, Pos pos)
         {
             var moves = new List<AppliedMove>();
             if (game.LastMove == null) return moves;
 
-            moves.AddRange(_InternalEnPassant(true, game, pos));
-            moves.AddRange(_InternalEnPassant(false, game, pos));
+            moves.AddRange(InternalEnPassant(true, game, pos));
+            moves.AddRange(InternalEnPassant(false, game, pos));
 
             return moves;
         }
 
-        private static IEnumerable<AppliedMove> _InternalEnPassant(bool isLeft, Game game, Pos pos)
+        private static IEnumerable<AppliedMove> InternalEnPassant(bool isLeft, Game game, Pos pos)
         {
             var piece = game.Board[pos];
             var moves = new List<AppliedMove>();
@@ -82,7 +81,7 @@ namespace AnarchyChess.Pieces
             var direction = isLeft ? -1 : 1;
             var opponentPawnPos = pos.AddX(direction);
 
-            if (!(game.Board[opponentPawnPos] is Pawn p)) return moves;
+            if (game.Board[opponentPawnPos] is not Pawn p) return moves;
             if (p.Side == piece.Side) return moves;
             if (p.MoveCount != 1) return moves;
             if (game.LastMove == null) return moves;

@@ -24,7 +24,7 @@ namespace AnarchyChess.Pieces
         }
 
         
-        public static IEnumerable<AppliedMove> NormalMove(Game board, Pos pos) =>
+        public IEnumerable<AppliedMove> NormalMove(Game board, Pos pos) =>
             new[] {
                 new Pos(1, 2), new Pos(2, 1),
                 new Pos(2, -1), new Pos(1, -2),

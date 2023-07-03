@@ -27,7 +27,7 @@ namespace AnarchyChess.Pieces
         }
 
         
-        public static IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
+        public IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
         {
             var moves = new List<AppliedMove>();
             for (var x = -1; x <= 1; x++)
@@ -48,17 +48,17 @@ namespace AnarchyChess.Pieces
         {
             var piece = game.Board[pos];
             var moves = new List<AppliedMove>();
-            if (piece.MoveCount > 0) return moves;
+            if (piece == null || piece.MoveCount > 0) return moves;
 
-            moves.AddRange(_InternalCastle(true, game, pos));
-            moves.AddRange(_InternalCastle(false, game, pos));
+            moves.AddRange(InternalCastle(true, game, pos));
+            moves.AddRange(InternalCastle(false, game, pos));
 
             return moves;
         }
 
         //TODO Rewrite it in a way that it does not matter where the castlable is.
         // It should just be unmoved and in the same row/column.
-        private static IEnumerable<AppliedMove> _InternalCastle(bool isLeft, Game game, Pos pos)
+        private static IEnumerable<AppliedMove> InternalCastle(bool isLeft, Game game, Pos pos)
         {
             var rookX = isLeft ? 0 : 7;
             var direction = isLeft ? -1 : 1;

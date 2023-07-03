@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using AnarchyChess.Boards;
 using AnarchyChess.Games.Chess;
 using AnarchyChess.Moves;
@@ -11,24 +12,24 @@ namespace AnarchyChess.Games
     /// <summary>
     /// This object represents a game in a given state.
     /// </summary>
-    public class Game : Resource
+    public class Game
     {
-        [Signal]
-        public delegate void GameCreated(Game game);
+        // [Signal]
+        // public delegate void GameCreated(Game game);
 
-        [Signal]
-        public delegate void PieceMoved(Game game, MoveStep step);
+        // [Signal]
+        // public delegate void PieceMoved(Game game, MoveStep step);
 
-        // Cannot use interface types (like `IPiece`) in signal signatures...
-        [Signal]
-        public delegate void PieceRemoved(Game game, Pos pos, Object piece);
+        // // Cannot use interface types (like `IPiece`) in signal signatures...
+        // [Signal]
+        // public delegate void PieceRemoved(Game game, Pos pos, Object piece);
 
-        [Signal]
-        public delegate void PieceAdded(Game game, Pos pos, Object piece);
+        // [Signal]
+        // public delegate void PieceAdded(Game game, Pos pos, Object piece);
 
-        [Signal]
-        public delegate void PiecePromoted(Game game, MoveStep step, Object piece);
-        
+        // [Signal]
+        // public delegate void PiecePromoted(Game game, MoveStep step, Object piece);
+
         public readonly PieceToAscii PieceToAsciiRegistry;
 
         /// <summary>
@@ -39,13 +40,13 @@ namespace AnarchyChess.Games
         /// <summary>
         /// The actual score of each side.
         /// </summary>
-        
+
         public Dictionary<Side, int> Scores { get; private set; }
 
         /// <summary>
         /// The list of moves that happened during this game.
         /// </summary>
-        
+
         public List<HistoryMove> MoveHistory { get; private set; }
 
         /// <summary>
@@ -59,12 +60,6 @@ namespace AnarchyChess.Games
         public HistoryMove? LastMove => MoveHistory.Count <= 0 ? null : MoveHistory.Last();
 
         /// <summary>
-        /// Should never be used, but Godot is complaining about the lack of its existence.
-        /// </summary>
-        /// <exception cref="Exception">Is always thrown</exception>
-        public Game() => throw new Exception();
-
-        /// <summary>
         /// Create a new game with played on a board and optionally with a move validator.
         /// If a validator is not specified, it will use the standard chess move validator.
         /// </summary>
@@ -76,7 +71,7 @@ namespace AnarchyChess.Games
         {
             Board = board;
             PieceToAsciiRegistry = registry ?? new PieceToAscii();
-            Validator = validator ?? new ChessStandardValidator();
+            Validator = validator ?? new StandardChessValidator();
             MoveHistory = new List<HistoryMove>();
             Scores = new Dictionary<Side, int> {
                 { Side.White, 0 },
@@ -89,27 +84,27 @@ namespace AnarchyChess.Games
         /// </summary>
         public void Create()
         {
-            EmitSignal(nameof(GameCreated), this);
+            // EmitSignal(nameof(GameCreated), this);
         }
 
         /// <summary>
         /// Remove a piece from the board at a given position. After removing it, return it.
         /// </summary>
         /// <param name="pos">The position to remove it at</param>
-        /// <returns>The removed piece</returns>
+        /// <returns>The removed piece or null if it did not exist</returns>
         public IPiece? RemovePiece(Pos pos)
         {
             var piece = Board.RemovePiece(pos);
-            if (piece != null) EmitSignal(nameof(PieceRemoved), this, pos, piece);
+            // if (piece != null) EmitSignal(nameof(PieceRemoved), this, pos, piece);
             return piece;
         }
-        
+
         public void AddPiece(Pos pos, IPiece piece)
         {
             Board.AddPiece(pos, piece);
-            EmitSignal(nameof(PieceAdded), this, pos, piece);
+            // EmitSignal(nameof(PieceAdded), this, pos, piece);
         }
-        
+
         /// <summary>
         /// Execute a move in the game.
         /// </summary>
@@ -118,28 +113,28 @@ namespace AnarchyChess.Games
         public void ApplyMove(AppliedMove move)
         {
             var steps = move.GetSteps();
-            
-            var taken = move.TakeList.Select(RemovePiece).Where(x => x != null).ToList();
+
+            var taken = move.TakeList.SelectNotNull(RemovePiece).ToList();
             taken.ForEach(x => Scores[x.Side] += x.Cost);
-            
-            Board.ApplySteps(steps, (piece, step) => {
+
+            Board.ApplySteps(steps, (piece, step) =>
+            {
                 piece.MoveCount++;
 
                 if (step.PromotesTo == null)
                 {
-                    EmitSignal(nameof(PieceMoved), this, step);
+                    // EmitSignal(nameof(PieceMoved), this, step);
                     return;
                 }
-                
+
                 var pieceCtor = step.PromotesTo.GetConstructor(new[] { typeof(Side) });
                 if (pieceCtor == null) throw new NullReferenceException();
                 var promoted = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
 
                 Board.ReplacePiece(step.To, promoted);
-                EmitSignal(nameof(PiecePromoted), this, step, promoted);
-
+                // EmitSignal(nameof(PiecePromoted), this, step, promoted);
             });
-            
+
             MoveHistory.Add(new HistoryMove(move));
         }
 
@@ -181,7 +176,6 @@ namespace AnarchyChess.Games
         /// - The scores are cloned <br/>
         /// </summary>
         /// <returns>A copy of the game</returns>
-        
         public Game Clone()
         {
             var gameClone = new Game(Board.Clone(), registry: PieceToAsciiRegistry, validator: Validator);

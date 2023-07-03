@@ -3,7 +3,7 @@ using AnarchyChess.Moves;
 
 namespace AnarchyChess.Games.Chess
 {
-    public class ChessStandardValidator : IMoveValidator
+    public class StandardChessValidator : IMoveValidator
     {
         public bool Validate(Game game, AppliedMove foldedAppliedMove) => IsValidMove(game, foldedAppliedMove);
 
@@ -51,7 +51,7 @@ namespace AnarchyChess.Games.Chess
             if (firstPiece == null) return false;
 
             var takesAll = move.TakeList
-                .All(x => game.Board[x] != null && game.Board[x].Side != firstPiece.Side);
+                .All(x => game.Board[x] != null && game.Board[x]!.Side != firstPiece.Side);
 
             return takesAll;
         }

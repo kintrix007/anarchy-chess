@@ -27,7 +27,7 @@ namespace AnarchyChess.Pieces
         /// <param name="pos">The position from where to generate the moves</param>
         /// <returns>The possible (unvalidated) moves</returns>
         
-        public static IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
+        public IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
         {
             var moves = new List<AppliedMove>();
 
