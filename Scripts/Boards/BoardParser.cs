@@ -10,7 +10,6 @@ namespace AnarchyChess.Scripts.Boards
 {
     public static class BoardParser
     {
-        
         //TODO PLEASE clean up this mess. I beg you.
         /// <summary>
         /// Parse a chess string into a board state. It is a modified version of it,
