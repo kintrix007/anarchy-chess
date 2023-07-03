@@ -20,18 +20,18 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<Move> GetMoves(Game game, Pos pos)
+        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos)
         {
             return NormalMove(game, pos);
         }
 
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Game board, [NotNull] Pos pos) =>
+        public static IEnumerable<AppliedMove> NormalMove([NotNull] Game board, [NotNull] Pos pos) =>
             new[] {
                 new Pos(1, 2), new Pos(2, 1),
                 new Pos(2, -1), new Pos(1, -2),
                 new Pos(-1, 2), new Pos(-2, 1),
                 new Pos(-2, -1), new Pos(-1, -2),
-            }.Select(x => Move.Relative(pos, x).Take());
+            }.Select(x => AppliedMove.Relative(pos, x).Take());
     }
 }

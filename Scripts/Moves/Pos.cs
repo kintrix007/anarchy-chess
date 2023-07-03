@@ -113,6 +113,8 @@ namespace AnarchyChess.Scripts.Moves
 
         public override string ToString() => $"Pos({X}, {Y})";
 
+        public Pos Clone() => new Pos(X, Y);
+
         /* --- Protected --- */
 
         protected Pos(char x, int y) : this(LetterToCoord(x), y - 1) {}

@@ -19,12 +19,12 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
         
-        public IEnumerable<Move> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
+        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
         
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
+        public static IEnumerable<AppliedMove> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             moves.AddRange(Rook.NormalMove(game, pos));
             moves.AddRange(Knight.NormalMove(game, pos));
 

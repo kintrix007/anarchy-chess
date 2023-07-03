@@ -21,15 +21,18 @@ namespace AnarchyChess.Scripts.Games
         public delegate void GameCreated([NotNull] Game game);
 
         [Signal]
-        public delegate void PieceMoved([NotNull] Game game, [NotNull] Move move);
+        public delegate void PieceMoved([NotNull] Game game, [NotNull] MoveStep step);
 
-        // Cannot use interface types in signal signatures...
+        // Cannot use interface types (like `IPiece`) in signal signatures...
         [Signal]
         public delegate void PieceRemoved([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
 
         [Signal]
         public delegate void PieceAdded([NotNull] Game game, [NotNull] Pos pos, [NotNull] Object piece);
 
+        [Signal]
+        public delegate void PiecePromoted([NotNull] Game game, [NotNull] MoveStep step, [NotNull] Object piece);
+        
         [NotNull] public readonly PieceToAscii PieceToAsciiRegistry;
 
         /// <summary>
@@ -47,7 +50,7 @@ namespace AnarchyChess.Scripts.Games
         /// The list of moves that happened during this game.
         /// </summary>
         [NotNull, ItemNotNull]
-        public List<Move> MoveHistory { get; private set; }
+        public List<HistoryMove> MoveHistory { get; private set; }
 
         /// <summary>
         /// The move validator of this game.
@@ -58,7 +61,7 @@ namespace AnarchyChess.Scripts.Games
         /// The last move of the game.
         /// </summary>
         [CanBeNull]
-        public Move LastMove => MoveHistory.Count <= 0 ? null : MoveHistory.Last();
+        public HistoryMove LastMove => MoveHistory.Count <= 0 ? null : MoveHistory.Last();
 
         /// <summary>
         /// Should never be used, but Godot is complaining about the lack of its existence.
@@ -79,14 +82,11 @@ namespace AnarchyChess.Scripts.Games
             Board = board;
             PieceToAsciiRegistry = registry ?? new PieceToAscii();
             Validator = validator ?? new ChessStandardValidator();
-            MoveHistory = new List<Move>();
+            MoveHistory = new List<HistoryMove>();
             Scores = new Dictionary<Side, int> {
                 { Side.White, 0 },
                 { Side.Black, 0 },
             };
-
-            board.Connect(nameof(Board.PieceAdded), this, nameof(OnPieceAdded));
-            board.Connect(nameof(Board.PieceRemoved), this, nameof(OnPieceRemoved));
         }
 
         /// <summary>
@@ -98,51 +98,87 @@ namespace AnarchyChess.Scripts.Games
         }
 
         /// <summary>
-        /// Execute a move to the board.
+        /// Remove a piece from the board at a given position. After removing it, return it.
         /// </summary>
-        /// <param name="move">The move to apply</param>
-        /// <param name="shouldValidate">Whether the move should be validated</param>
-        /// <returns>Whether the move succeeded</returns>
-        //? Might be a good idea to consider, instead, throwing an exception if unsuccessful
-        public bool ApplyMove([NotNull] Move move, bool shouldValidate = true)
+        /// <param name="pos">The position to remove it at</param>
+        /// <returns>The removed piece</returns>
+        [CanBeNull]
+        public IPiece RemovePiece([NotNull] Pos pos)
         {
-            var movingPiece = Board[move.From];
-            if (movingPiece == null) return false;
-            if (shouldValidate && !ValidateMove(move)) return false;
+            var piece = Board.RemovePiece(pos);
+            if (piece != null) EmitSignal(nameof(PieceRemoved), this, pos, piece);
+            return piece;
+        }
+        
+        public void AddPiece([NotNull] Pos pos, [NotNull] IPiece piece)
+        {
+            Board.AddPiece(pos, piece);
+            EmitSignal(nameof(PieceAdded), this, pos, piece);
+        }
+        
+        /// <summary>
+        /// Execute a move in the game.
+        /// </summary>
+        /// <param name="move">The move to execute</param>
+        /// <exception cref="NullReferenceException"></exception>
+        public void ApplyMove([NotNull] AppliedMove move)
+        {
+            var steps = move.GetSteps();
+            
+            var taken = move.TakeList.Select(RemovePiece).Where(x => x != null).ToList();
+            taken.ForEach(x => Scores[x.Side] += x.Cost);
+            
+            Board.ApplySteps(steps, (piece, step) => {
+                piece.MoveCount++;
 
-            var taken = move.Unfold()
-                .SelectMany(x => x.TakeList.Select(p => Board.RemovePiece(p)))
-                .Where(x => x != null)
-                .ToList();
+                if (step.PromotesTo == null)
+                {
+                    EmitSignal(nameof(PieceMoved), this, step);
+                    return;
+                }
+                
+                var pieceCtor = step.PromotesTo.GetConstructor(new[] { typeof(Side) });
+                if (pieceCtor == null) throw new NullReferenceException();
+                var promoted = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
 
-            taken.ForEach(x => Scores[movingPiece.Side] += x.Cost);
-            movingPiece.MoveCount++;
-            MoveHistory.Add(move);
+                Board.ReplacePiece(step.To, promoted);
+                EmitSignal(nameof(PiecePromoted), this, step, promoted);
 
-            Board.InternalApplyMove(move);
-
-            EmitSignal(nameof(PieceMoved), this, move);
-            return true;
+            });
+            
+            MoveHistory.Add(new HistoryMove(move));
         }
 
-        public IEnumerable<Move> GetAllValidMoves(Side side)
+        /// <summary>
+        /// Get all the moves a given side can make. These moves remain to be validated.
+        /// </summary>
+        /// <param name="side">The side to get the moves of</param>
+        /// <returns>The moves</returns>
+        public IEnumerable<AppliedMove> GetAllMoves(Side side)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             foreach (var (pos, piece) in Board)
             {
                 if (piece.Side != side) continue;
-                moves.AddRange(piece.GetMoves(this, pos).Where(ValidateMove));
+                moves.AddRange(piece.GetMoves(this, pos));
             }
 
             return moves;
         }
 
         /// <summary>
+        /// Determine whether a giver side has at least one valid move.
+        /// </summary>
+        /// <param name="side">The side to check</param>
+        /// <returns>Whether there is at least one valid move</returns>
+        public bool HasValidMove(Side side) => GetAllMoves(side).Any(IsValidMove);
+
+        /// <summary>
         /// Validate a move with this game's validator.
         /// </summary>
-        /// <param name="move">The move to validate</param>
+        /// <param name="appliedMove">The move to validate</param>
         /// <returns>Whether the move is valid</returns>
-        public bool ValidateMove([NotNull] Move move) => Validator.Validate(this, move);
+        public bool IsValidMove([NotNull] AppliedMove appliedMove) => Validator.Validate(this, appliedMove);
 
         /// <summary>
         /// As it stands currently, you should not assume a completely accurate clone.
@@ -156,22 +192,12 @@ namespace AnarchyChess.Scripts.Games
         {
             var gameClone = new Game(Board.Clone(), registry: PieceToAsciiRegistry, validator: Validator);
 
-            // I think this should make a shallow copy
+            //? This only makes a shallow copy, but since the elements are immutable that's fine.
             gameClone.MoveHistory = MoveHistory.ToList();
             gameClone.Scores[Side.White] = Scores[Side.White];
             gameClone.Scores[Side.Black] = Scores[Side.Black];
 
             return gameClone;
-        }
-
-        private void OnPieceAdded([NotNull] Pos pos, [NotNull] Object piece)
-        {
-            EmitSignal(nameof(PieceAdded), this, pos, piece);
-        }
-
-        private void OnPieceRemoved([NotNull] Pos pos, [NotNull] Object piece)
-        {
-            EmitSignal(nameof(PieceRemoved), this, pos, piece);
         }
     }
 }

@@ -6,6 +6,11 @@ using JetBrains.Annotations;
 
 namespace AnarchyChess.Scripts.Games
 {
+    /// <summary>
+    /// A simple two-way dictionary that maps between piece types and character representations of the
+    /// pieces. This is always case-insensitive, as lowercase characters represent black, and uppercase
+    /// characters represent white.
+    /// </summary>
     public class PieceToAscii
     {
         private readonly Dictionary<char, Type> _asciiToPieceRegistry;
@@ -22,6 +27,14 @@ namespace AnarchyChess.Scripts.Games
         public PieceToAscii(Dictionary<Type, char> registry) : this(registry, Invert(registry)) {}
         public PieceToAscii(Dictionary<char, Type> registry) : this(Invert(registry), registry) {}
 
+        /// <summary>
+        /// Register what piece is represented by what character. This is case-insensitive,
+        /// as lowercase characters represent black, and uppercase characters represent white.
+        /// </summary>
+        /// <param name="piece">The type of the piece</param>
+        /// <param name="ascii">The character representation of the piece</param>
+        /// <returns>This registry itself</returns>
+        /// <exception cref="ArgumentException">Thrown if the piece is not already in the registry</exception>
         public PieceToAscii Register(Type piece, char ascii)
         {
             ascii = char.ToUpper(ascii);
@@ -34,7 +47,13 @@ namespace AnarchyChess.Scripts.Games
             _asciiToPieceRegistry[ascii] = piece;
             return this;
         }
-
+         
+        /// <summary>
+        /// Deregister a piece from the two-way dictionary.
+        /// </summary>
+        /// <param name="piece">The type of the piece to deregister</param>
+        /// <returns>This registry itself</returns>
+        /// <exception cref="ArgumentException">Thrown if the piece is not already in the registry</exception>
         public PieceToAscii Deregister(Type piece)
         {
             if (!piece.GetInterfaces().Contains(typeof(IPiece)))
@@ -50,6 +69,11 @@ namespace AnarchyChess.Scripts.Games
             return this;
         }
 
+        /// <summary>
+        /// Deregister a piece from the two-way dictionary.
+        /// </summary>
+        /// <param name="ascii">The character representation for the piece (case-insensitive)</param>
+        /// <returns>This registry itself</returns>
         public PieceToAscii Deregister(char ascii)
         {
             ascii = char.ToUpper(ascii);

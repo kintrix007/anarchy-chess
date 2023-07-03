@@ -1,27 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using AnarchyChess.Scripts.Games;
+using System.Linq;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
 using JetBrains.Annotations;
-using Signal = Godot.SignalAttribute;
 using Resource = Godot.Resource;
-using Object = Godot.Object;
 
 namespace AnarchyChess.Scripts.Boards
 {
     /// <summary>
-    /// Object to hold all the pieces.
+    /// Object to hold all the pieces on their corresponding position.
     /// </summary>
     public class Board : Resource, IEnumerable<(Pos pos, IPiece piece)>
     {
-        [Signal]
-        public delegate void PieceAdded([NotNull] Pos pos, [NotNull] Object piece);
-
-        [Signal]
-        public delegate void PieceRemoved([NotNull] Pos pos, [NotNull] Object piece);
-
         [NotNull, ItemCanBeNull] private readonly IPiece[,] _pieces;
 
         //TODO Actually take these values into consideration after making them public.
@@ -70,8 +62,6 @@ namespace AnarchyChess.Scripts.Boards
         public void AddPiece([NotNull] Pos pos, [NotNull] IPiece piece)
         {
             if (this[pos] != null) throw new ArgumentException($"There is already a piece at {pos}");
-
-            EmitSignal(nameof(Game.PieceAdded), pos, (Object)piece);
             this[pos] = piece;
         }
 
@@ -86,31 +76,78 @@ namespace AnarchyChess.Scripts.Boards
             var piece = this[pos];
             this[pos] = null;
 
-            if (piece != null)
-            {
-                EmitSignal(nameof(Game.PieceRemoved), pos, (Object)piece);
-            }
-
             return piece;
         }
 
-        /// <summary>
-        /// Apply the move with its follow-ups on the board.
-        /// </summary>
-        /// <param name="foldedMove"></param>
-        /// <exception cref="ArgumentException"></exception>
-        public void InternalApplyMove([NotNull] Move foldedMove)
+        public void ReplacePiece([NotNull] Pos pos, [NotNull] IPiece with)
         {
-            if (!IsInBounds(foldedMove.To)) throw new ArgumentException($"{foldedMove.To} is out of bounds");
+            if (this[pos] == null) throw new ArgumentException($"There is no piece to replace at {pos}");
+            this[pos] = with;
+        }
+        
+        /// <summary>
+        /// Apply a move that is already split into steps.<br />
+        /// <br />
+        /// Now, this one has some quirks as it currently stands, so brace yourself: <br />
+        /// <br />
+        /// The callback is called after a step is applied.
+        /// This is where the move counter could be implemented etc. <br />
+        /// <br />
+        /// It is allowed for a piece to move on the same square as another one under the following conditions: <br />
+        ///   1. At most 2 pieces may stand on the same tile after any step of the move. <br />
+        ///   2. After the last step, every piece must stand on a unique tile. <br />
+        /// </summary>
+        /// <param name="steps">The already split up steps of a move</param>
+        /// <param name="afterStepCallback">Function to be called after each step</param>
+        /// <exception cref="Exception">If some of the rules got violated</exception>
+        public void ApplySteps([NotNull] List<MoveStep> steps, Action<IPiece, MoveStep> afterStepCallback)
+        {
+            var tmpPositions = new Dictionary<Pos, IPiece>();
 
-            var moveList = foldedMove.Unfold();
-            var movingPieces = new Dictionary<Move, IPiece>();
-            moveList.ForEach(move => movingPieces[move] = this[move.From]);
+            IPiece GetAt(Pos pos) => tmpPositions.ContainsKey(pos) ? tmpPositions[pos] : this[pos];
 
-            moveList.ForEach(move => {
-                this[move.To] = movingPieces[move];
-                this[move.From] = null;
-            });
+            void SetAt(Pos pos, IPiece piece)
+            {
+                if (this[pos] != null)
+                {
+                    if (tmpPositions.ContainsKey(pos))
+                    {
+                        throw new Exception("There are more than 2 overlapping pieces.");
+                    }
+                    tmpPositions[pos] = this[pos];
+                }
+
+                this[pos] = piece;
+            }
+
+            void PopPossible()
+            {
+                var toRemove = new List<Pos>();
+                
+                foreach (var pair in tmpPositions.Where(pair => this[pair.Key] == null))
+                {
+                    this[pair.Key] = pair.Value;
+                    toRemove.Add(pair.Key);
+                }
+                
+                toRemove.ForEach(x => tmpPositions.Remove(x));
+            }
+            
+            foreach (var step in steps)
+            {
+                var movingPiece = GetAt(step.From);
+                
+                SetAt(step.To, movingPiece);
+                this[step.From] = null;
+                PopPossible();
+
+                afterStepCallback(movingPiece, step);
+            }
+
+            if (tmpPositions.Count != 0)
+            {
+                throw new Exception("There are overlapping pieces at the end of the move.");
+            }
         }
 
         /// <summary>
@@ -121,21 +158,15 @@ namespace AnarchyChess.Scripts.Boards
         public Board Clone()
         {
             var boardClone = new Board();
-            for (var y = 0; y < Height; y++)
+            foreach (var (pos, piece) in this)
             {
-                for (var x = 0; x < Width; x++)
-                {
-                    var piece = this[new Pos(x, y)];
-                    if (piece == null) continue;
+                var pieceCtor = piece.GetType().GetConstructor(new[] { typeof(Side) });
+                if (pieceCtor == null) throw new NullReferenceException();
 
-                    var pieceCtor = piece.GetType().GetConstructor(new[] { typeof(Side) });
-                    if (pieceCtor == null) throw new NullReferenceException();
+                var pieceClone = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
+                pieceClone.MoveCount = piece.MoveCount;
 
-                    var pieceClone = (IPiece)pieceCtor.Invoke(new object[] { piece.Side });
-                    pieceClone.MoveCount = piece.MoveCount;
-
-                    boardClone[new Pos(x, y)] = pieceClone;
-                }
+                boardClone[pos] = pieceClone;
             }
 
             return boardClone;

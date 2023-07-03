@@ -10,6 +10,18 @@ namespace AnarchyChess.Scripts.Boards
 {
     public static class BoardParser
     {
+        //TODO PLEASE clean up this mess. I beg you.
+        /// <summary>
+        /// Parse a chess string into a board state. It is a modified version of it,
+        /// which only contains the piece positions -- for now.
+        /// This is subject to change.
+        /// </summary>
+        /// <param name="template">The chess string</param>
+        /// <param name="registry">Registry to describe what character means which piece</param>
+        /// <returns>The parsed board</returns>
+        /// <exception cref="NullReferenceException">
+        /// If the type in the registry does not have the correct constructor signature
+        /// </exception>
         public static Board ParseBoard(this string template, [NotNull] PieceToAscii registry)
         {
             var board = new Board();
@@ -43,7 +55,14 @@ namespace AnarchyChess.Scripts.Boards
             return board;
         }
 
-        public static string DumpTemplate(this Board board, [NotNull] PieceToAscii registry)
+        /// <summary>
+        /// Create a visual ascii representation of the board state. This is at
+        /// best for debugging purposes
+        /// </summary>
+        /// <param name="board">The board to convert to string</param>
+        /// <param name="registry">The registry that matches up the types with the character representations</param>
+        /// <returns>The debug string representation of the board</returns>
+        public static string CreateDebugChessString(this Board board, [NotNull] PieceToAscii registry)
         {
             var pieceStrings = new string[board.Height][];
 

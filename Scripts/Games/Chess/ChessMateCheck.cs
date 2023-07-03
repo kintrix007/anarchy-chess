@@ -12,7 +12,7 @@ namespace AnarchyChess.Scripts.Games.Chess
         /// <param name="game">Game to check</param>
         /// <param name="side">Side to check</param>
         /// <returns>Whether it is a _ mate</returns>
-        public static bool IsMate(Game game, Side side) => !game.GetAllValidMoves(side).Any();
+        public static bool IsMate(Game game, Side side) => !game.HasValidMove(side);
 
         /// <summary>
         /// Determine whether a given side got a check mate.
@@ -41,10 +41,14 @@ namespace AnarchyChess.Scripts.Games.Chess
             foreach (var (pos, piece) in game.Board)
             {
                 if (piece.Side == side) continue;
-                var causesCheck = piece.GetMoves(game, pos)
-                    .Any(x => game.Board[x.To] is King k && k.Side == side);
 
-                if (causesCheck) return true;
+                var attackedPositions = piece.GetMoves(game, pos)
+                    .SelectMany(move => move.TakeList);
+                
+                var isInCheck = attackedPositions
+                    .Any(x => game.Board[x] is King k && k.Side == side);
+                
+                if (isInCheck) return true;
             }
 
             return false;

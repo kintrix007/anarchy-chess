@@ -32,6 +32,6 @@ namespace AnarchyChess.Scripts.PieceHelper
         /// <param name="pos">The current position of the piece</param>
         /// <returns>The moves the piece can make</returns>
         [NotNull, ItemNotNull]
-        IEnumerable<Move> GetMoves([NotNull] Game game, [NotNull] Pos pos);
+        IEnumerable<AppliedMove> GetMoves([NotNull] Game game, [NotNull] Pos pos);
     }
 }

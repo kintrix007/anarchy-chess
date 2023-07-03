@@ -11,4 +11,4 @@ data_*/
 .idea/
 
 # Do not include crash logs
-mono_crash*.json
+mono_crash*

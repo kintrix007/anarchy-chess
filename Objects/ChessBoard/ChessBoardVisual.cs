@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Compatibility;
 using AnarchyChess.Scripts.Games;
@@ -14,20 +15,31 @@ using Object = Godot.Object;
 
 namespace AnarchyChess.Objects.ChessBoard
 {
-    public class ChessBoardTileMap : TileMap, IManagedGame
+    public class ChessBoardVisual : TileMap, IManagedGame
     {
-        private Node _pieces;
+        private Node _piecesParent;
         private readonly Tween _tween = new Tween();
         private GameManager _gameManager;
 
-        [NotNull] public readonly Dictionary<Pos, Control> Pieces = new Dictionary<Pos, Control>();
+        [NotNull] public readonly Dictionary<Pos, TextureRect> PieceToControl = new Dictionary<Pos, TextureRect>();
 
         public override void _Ready()
         {
-            _pieces = GetNode("%Pieces");
+            _piecesParent = GetNode("%Pieces");
             AddChild(_tween);
 
-            var (board, registry) = BoardTemplates.Standard();
+            // var (board, registry) = BoardTemplates.Standard();
+            var registry = new PieceToAscii()
+                .Register(typeof(King), 'K')
+                .Register(typeof(Pawn), 'P')
+                .Register(typeof(Knight), 'N')
+                .Register(typeof(Bishop), 'B')
+                .Register(typeof(Rook), 'R')
+                .Register(typeof(Queen), 'Q')
+                .Register(typeof(Knook), 'Ñ');
+            
+            // var board = "8/PPPPPPPP/4K3/8/8/4k3/pppppppp/8".ParseBoard(registry);
+            var board = "ñnbqkbnñ/pppppppp/8/8/8/8/PPPPPPPP/ÑNBQKBNÑ".ParseBoard(registry);
             var game = new Game(board, registry: registry);
             _gameManager = new GameManager(game)
                 .SetDefaultTexturePath("res://icon.png")
@@ -41,8 +53,6 @@ namespace AnarchyChess.Objects.ChessBoard
                 .Manage(this);
             game.Create();
 
-            game.Board.RemovePiece(new Pos("A1"));
-            game.Board.AddPiece(new Pos("A1"), new Knook(Side.White));
             GD.Randomize();
         }
 
@@ -54,7 +64,7 @@ namespace AnarchyChess.Objects.ChessBoard
             _time += delta;
             if (_time > 0.5)
             {
-                var moves = _gameManager.Game.GetAllValidMoves(_last).ToList();
+                var moves = _gameManager.Game.GetAllMoves(_last).Where(_gameManager.Game.IsValidMove).ToList();
                 if (ChessMateCheck.IsMate(_gameManager.Game, _last))
                 {
                     GD.Print("_ Mate.");
@@ -71,8 +81,8 @@ namespace AnarchyChess.Objects.ChessBoard
 
         public void OnGameCreated(Game game)
         {
-            Pieces.Clear();
-            foreach (var c in _pieces.GetChildren())
+            PieceToControl.Clear();
+            foreach (var c in _piecesParent.GetChildren())
             {
                 var child = (Node)c;
                 child.QueueFree();
@@ -84,22 +94,22 @@ namespace AnarchyChess.Objects.ChessBoard
                 tex.Texture = _gameManager.GetTexture(piece);
                 tex.RectPosition = MapToWorld(PosToBoardVector2(game, pos));
 
-                _pieces.AddChild(tex);
-                Pieces[pos] = tex;
+                _piecesParent.AddChild(tex);
+                PieceToControl[pos] = tex;
             }
         }
 
-        public void OnPieceMoved(Game game, Move move)
+        public void OnPieceMoved(Game game, MoveStep step)
         {
-            var pos = move.To;
-            var piece = Pieces[move.From];
-            Pieces[pos] = piece;
-            Pieces.Remove(move.From);
+            var pos = step.To;
+            var pieceNode = PieceToControl[step.From];
+            PieceToControl[pos] = pieceNode;
+            PieceToControl.Remove(step.From);
 
             var worldPosition = MapToWorld(PosToBoardVector2(game, pos));
 
             _tween.InterpolateProperty(
-                piece, "rect_position",
+                pieceNode, "rect_position",
                 null, worldPosition,
                 0.3f, Tween.TransitionType.Cubic, Tween.EaseType.Out
             );
@@ -107,24 +117,44 @@ namespace AnarchyChess.Objects.ChessBoard
             _tween.Start();
         }
 
-        public void OnPieceRemoved(Game game, Pos pos, Object piece)
+        public void OnPiecePromoted(Game game, MoveStep step, Object piece)
         {
-            if (!Pieces.ContainsKey(pos)) return;
-            var boardPiece = Pieces[pos];
-            boardPiece.QueueFree();
-            Pieces.Remove(pos);
-        }
+            var pos = step.To;
+            var pieceNode = PieceToControl[step.From];
+            PieceToControl[pos] = pieceNode;
+            PieceToControl.Remove(step.From);
 
+            var worldPosition = MapToWorld(PosToBoardVector2(game, pos));
+
+            _tween.InterpolateProperty(
+                pieceNode, "rect_position",
+                null, worldPosition,
+                0.3f, Tween.TransitionType.Cubic, Tween.EaseType.Out
+            );
+
+            Task.Delay(300).ContinueWith(_ => pieceNode.Texture = _gameManager.GetTexture((IPiece)piece));
+
+            _tween.Start();
+        }
+        
         public void OnPieceAdded(Game game, Pos pos, Object piece)
         {
             var tex = new TextureRect();
             tex.Texture = _gameManager.GetTexture((IPiece) piece);
             tex.RectPosition = MapToWorld(PosToBoardVector2(game, pos));
 
-            _pieces.AddChild(tex);
-            Pieces[pos] = tex;
+            _piecesParent.AddChild(tex);
+            PieceToControl[pos] = tex;
         }
 
+        public void OnPieceRemoved(Game game, Pos pos, Object piece)
+        {
+            if (!PieceToControl.ContainsKey(pos)) return;
+            var boardPiece = PieceToControl[pos];
+            boardPiece.QueueFree();
+            PieceToControl.Remove(pos);
+        }
+        
         private static Vector2 PosToBoardVector2([NotNull] Game game, [NotNull] Pos pos)
         {
             var translatedPos = pos.SetY(game.Board.Height - 1 - pos.Y);

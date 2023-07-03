@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using AnarchyChess.Scripts.Boards;
 using AnarchyChess.Scripts.Games;
 using AnarchyChess.Scripts.Moves;
 using AnarchyChess.Scripts.PieceHelper;
@@ -12,6 +15,9 @@ namespace AnarchyChess.Scripts.Pieces
         public int Cost => 1;
         public Side Side { get; }
         public int MoveCount { get; set; }
+        public List<Type> Promotions =>
+            new List<Type>{ typeof(Queen), typeof(Rook), typeof(Knight), typeof(Bishop), typeof(Knook) };
+
 
         public Pawn(Side side)
         {
@@ -19,42 +25,47 @@ namespace AnarchyChess.Scripts.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<Move> GetMoves(Game game, Pos pos)
+        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             moves.AddRange(NormalMove(game, pos));
             moves.AddRange(EnPassant(game, pos));
+
+            moves = moves.SelectMany(x => {
+                if (IsPromotion(x)) return Promotions.Select(p => x.Clone().PromoteTo(p));
+                return new[] { x };
+            }).ToList();
 
             return moves.ToArray();
         }
 
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> NormalMove([NotNull] Game game, [NotNull] Pos pos)
+        public static IEnumerable<AppliedMove> NormalMove([NotNull] Game game, [NotNull] Pos pos)
         {
             var piece  = game.Board[pos];
-            var moves  = new List<Move>();
+            var moves  = new List<AppliedMove>();
             if (piece == null) return moves;
 
             var facing = piece.Side == Side.White ? 1 : -1;
-            moves.Add(Move.Relative(pos, new Pos(0, facing)));
+            moves.Add(AppliedMove.Relative(pos, new Pos(0, facing)));
 
             // Can go two tiles if it hasn't moved and there is nothing in front of it.
             if (piece.MoveCount == 0 && game.Board[pos.AddY(facing)] == null)
             {
-                moves.Add(Move.Relative(pos, new Pos(0, 2 * facing)));
+                moves.Add(AppliedMove.Relative(pos, new Pos(0, 2 * facing)));
             }
 
-            moves.Add(Move.Relative(pos, new Pos(-1, facing)).Must().Take());
-            moves.Add(Move.Relative(pos, new Pos(1, facing)).Must().Take());
+            moves.Add(AppliedMove.Relative(pos, new Pos(-1, facing)).Must().Take());
+            moves.Add(AppliedMove.Relative(pos, new Pos(1, facing)).Must().Take());
 
             return moves;
         }
 
         /// Defined in a way that it works even if the pawn did not start at the pawn base line
         [NotNull, ItemNotNull]
-        public static IEnumerable<Move> EnPassant([NotNull] Game game, [NotNull] Pos pos)
+        public static IEnumerable<AppliedMove> EnPassant([NotNull] Game game, [NotNull] Pos pos)
         {
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             if (game.LastMove == null) return moves;
 
             moves.AddRange(_InternalEnPassant(true, game, pos));
@@ -63,10 +74,10 @@ namespace AnarchyChess.Scripts.Pieces
             return moves;
         }
 
-        private static IEnumerable<Move> _InternalEnPassant(bool isLeft, Game game, Pos pos)
+        private static IEnumerable<AppliedMove> _InternalEnPassant(bool isLeft, Game game, Pos pos)
         {
             var piece = game.Board[pos];
-            var moves = new List<Move>();
+            var moves = new List<AppliedMove>();
             if (piece == null) return moves;
 
             var facing = piece.Side == Side.White ? 1 : -1;
@@ -77,13 +88,25 @@ namespace AnarchyChess.Scripts.Pieces
             if (p.Side == piece.Side) return moves;
             if (p.MoveCount != 1) return moves;
             if (game.LastMove == null) return moves;
-            if (game.LastMove.To != opponentPawnPos) return moves;
-            if (game.LastMove.AsRelative.Abs() != new Pos(0, 2)) return moves;
+            if (game.LastMove.Steps.Count != 1) return moves;
+            var lastStep = game.LastMove.Steps[0];
 
-            moves.Add(Move.Relative(pos, new Pos(direction, facing))
+            if (lastStep.To != opponentPawnPos) return moves;
+            if (lastStep.Offset.Abs() != new Pos(0, 2)) return moves;
+
+            moves.Add(AppliedMove.Relative(pos, new Pos(direction, facing))
                 .AddTake(opponentPawnPos).Must());
 
             return moves;
+        }
+
+        private static bool IsPromotion(AppliedMove appliedMove)
+        {
+            var steps = appliedMove.GetSteps();
+            if (steps.Count != 1) return false;
+
+            var step = steps[0];
+            return step.To.Y == 0 || step.To.Y == 7;
         }
     }
 }
