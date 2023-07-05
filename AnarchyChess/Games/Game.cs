@@ -40,13 +40,11 @@ namespace AnarchyChess.Games
         /// <summary>
         /// The actual score of each side.
         /// </summary>
-
         public Dictionary<Side, int> Scores { get; private set; }
 
         /// <summary>
         /// The list of moves that happened during this game.
         /// </summary>
-
         public List<HistoryMove> MoveHistory { get; private set; }
 
         /// <summary>
@@ -57,7 +55,7 @@ namespace AnarchyChess.Games
         /// <summary>
         /// The last move of the game.
         /// </summary>
-        public HistoryMove? LastMove => MoveHistory.Count <= 0 ? null : MoveHistory.Last();
+        public HistoryMove? LastMove => MoveHistory.LastOrDefault();
 
         /// <summary>
         /// Create a new game with played on a board and optionally with a move validator.
