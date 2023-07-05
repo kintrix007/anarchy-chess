@@ -114,7 +114,7 @@ namespace AnarchyChess.Games
         {
             var steps = move.GetSteps();
 
-            var taken = move.TakeList.SelectNotNull(RemovePiece).ToList();
+            var taken = move.CaptureList.SelectNotNull(RemovePiece).ToList();
             taken.ForEach(x => Scores[x.Side] += x.Cost);
 
             Board.ApplySteps(steps, (piece, step) =>

@@ -9,12 +9,19 @@ namespace AnarchyChess.Games.Chess
 
         public static bool IsValidMove(Game game, AppliedMove move)
         {
+            if (!IsPossibleMove(game, move)) return false;
             if (!ValidateBounds(game, move)) return false;
             if (!ValidateOverlap(game, move)) return false;
-            if (!ValidateMustTake(game, move)) return false;
+            if (!ValidateCaptureOnly(game, move)) return false;
             if (!ValidateNoCheck(game, move)) return false;
 
             return true;
+        }
+
+        //TODO: Implement
+        private static bool IsPossibleMove(Game game, AppliedMove move)
+        {
+            throw new NotImplementedException();
         }
 
         public static bool ValidateBounds(Game game, AppliedMove move)
@@ -38,19 +45,23 @@ namespace AnarchyChess.Games.Chess
                 if (destPiece == null) continue;
 
                 if (destPiece.Side == movingPiece.Side) return false;
-                if (!move.TakeList.Contains(step.To)) return false;
+                if (!move.CaptureList.Contains(step.To)) return false;
             }
 
             return true;
         }
 
-        public static bool ValidateMustTake(Game game, AppliedMove move)
+        /// <summary>
+        /// Validate that if a move can only happen when it captures a piece,
+        /// then it really did capture a piece.
+        /// </summary>
+        public static bool ValidateCaptureOnly(Game game, AppliedMove move)
         {
-            if (!move.MustTake) return true;
+            if (!move.MustBeACapture) return true;
             var firstPiece = game.Board[move.GetSteps()[0].From];
             if (firstPiece == null) return false;
 
-            var takesAll = move.TakeList
+            var takesAll = move.CaptureList
                 .All(x => game.Board[x] != null && game.Board[x]!.Side != firstPiece.Side);
 
             return takesAll;

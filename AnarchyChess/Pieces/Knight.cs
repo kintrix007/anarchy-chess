@@ -20,16 +20,16 @@ namespace AnarchyChess.Pieces
 
         public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos)
         {
-            return NormalMove(game, pos);
+            return NormalMove(game, pos).Select(x => x.Build());
         }
 
         
-        public IEnumerable<AppliedMove> NormalMove(Game board, Pos pos) =>
+        public IEnumerable<MoveBuilder> NormalMove(Game board, Pos pos) =>
             new[] {
                 new Pos(1, 2), new Pos(2, 1),
                 new Pos(2, -1), new Pos(1, -2),
                 new Pos(-1, 2), new Pos(-2, 1),
                 new Pos(-2, -1), new Pos(-1, -2),
-            }.Select(x => AppliedMove.Relative(pos, x).Take());
+            }.Select(x => MoveBuilder.Relative(pos, x).Capture());
     }
 }

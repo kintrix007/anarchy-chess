@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+
 using AnarchyChess.Games;
 using AnarchyChess.Moves;
 using AnarchyChess.PieceHelper;
@@ -18,12 +19,14 @@ namespace AnarchyChess.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
-
-        
-        public IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
+        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos)
         {
-            var moves = new List<AppliedMove>();
+            return NormalMove(game, pos).Select(x => x.Build());
+        }
+
+        public IEnumerable<MoveBuilder> NormalMove(Game game, Pos pos)
+        {
+            var moves = new List<MoveBuilder>();
 
             var directions = new[] {
                 new Pos(1, 0), new Pos(0, 1),
@@ -32,7 +35,10 @@ namespace AnarchyChess.Pieces
 
             foreach (var dir in directions)
             {
-                moves.AddRange(MoveTemplates.RunLine(game.Board, pos, dir).Select(x => x.Take()));
+                var line = MoveTemplates
+                    .RunLine(game.Board, pos, dir)
+                    .Select(x => x.Capture());
+                moves.AddRange(line);
             }
 
             return moves;

@@ -47,12 +47,12 @@ namespace AnarchyChess.Moves
         /// Create a new AppliedMove object with a single step that holds the date of this step.
         /// </summary>
         /// <returns>The new AppliedMove object</returns>
-        public AppliedMove ToAppliedMove() => AppliedMove.Absolute(From, To).PromoteTo(PromotesTo);
+        public AppliedMove ToAppliedMove() => MoveBuilder.Absolute(From, To).PromoteTo(PromotesTo).Build();
 
         /// <summary>
         /// Performs a deep copy of this step.
         /// </summary>
         /// <returns></returns>
-        public MoveStep Clone() => new MoveStep(From.Clone(), To.Clone(), PromotesTo);
+        public MoveStep Clone() => new(From.Clone(), To.Clone(), PromotesTo);
     }
 }

@@ -43,7 +43,7 @@ namespace AnarchyChess.Games.Chess
                 if (piece.Side == side) continue;
 
                 var attackedPositions = piece.GetMoves(game, pos)
-                    .SelectMany(move => move.TakeList);
+                    .SelectMany(move => move.CaptureList);
                 
                 var isInCheck = attackedPositions
                     .Any(x => game.Board[x] is King k && k.Side == side);
