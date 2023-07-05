@@ -59,13 +59,14 @@ public class MoveBuilder : StepBuilder
         return clone;
     }
 
-    public new AppliedMove Build() => new(
+    public new AppliedMove Build(IPiece piece) => new(
+            piece,
             From,
             To,
             CaptureList,
             MustBeACapture,
             Promotion,
-            FollowUp?.Build());
+            FollowUp?.Build(piece));
 }
 
 public class StepBuilder
@@ -103,13 +104,14 @@ public class StepBuilder
         throw new NotImplementedException();
     }
 
-    public AppliedMove Build() => new(
+    public AppliedMove Build(IPiece piece) => new(
+            piece,
             From,
             To,
             new(),
             false,
             Promotion,
-            FollowUp?.Build());
+            FollowUp?.Build(piece));
 
     protected StepBuilder(Pos from, Pos to)
     {

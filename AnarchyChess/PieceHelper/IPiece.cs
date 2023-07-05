@@ -31,7 +31,7 @@ namespace AnarchyChess.PieceHelper
         /// <param name="pos">The current position of the piece</param>
         /// <returns>The moves the piece can make</returns>
         IEnumerable<AppliedMove> GetMoves(Game game, Pos pos) {
-            return GetMoveBuilders(game, pos).Select(x => x.Build());
+            return GetMoveBuilders(game, pos).Select(x => x.Build(this));
         }
 
         IEnumerable<MoveBuilder> GetMoveBuilders(Game game, Pos pos);

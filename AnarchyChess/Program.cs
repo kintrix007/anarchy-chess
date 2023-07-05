@@ -20,7 +20,7 @@ internal class Program
         var game = new Game(board, registry);
         Console.WriteLine(game.Board.CreateDebugChessString(registry));
 
-        var move = MoveBuilder.Absolute(new Pos("D2"), new Pos("D7")).Build();
+        var move = MoveBuilder.Absolute(new Pos("D2"), new Pos("D7")).Build(board[new Pos("D2")]!);
         Console.WriteLine(game.IsValidMove(move));
         game.ApplyMove(move);
         Console.WriteLine(game.Board.CreateDebugChessString(registry));

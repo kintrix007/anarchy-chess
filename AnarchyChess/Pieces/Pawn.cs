@@ -93,9 +93,9 @@ public class Pawn : IPiece, IPromotable
         return moves;
     }
 
-    private static bool ShouldBePromotion(MoveBuilder appliedMove)
+    private bool ShouldBePromotion(MoveBuilder appliedMove)
     {
-        var steps = appliedMove.Build().GetSteps();
+        var steps = appliedMove.Build(this).GetSteps();
         if (steps.Count != 1) return false;
 
         var step = steps[0];

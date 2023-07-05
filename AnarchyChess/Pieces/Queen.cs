@@ -17,12 +17,14 @@ namespace AnarchyChess.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos) => NormalMove(game, pos);
-
-        
-        public IEnumerable<AppliedMove> NormalMove(Game game, Pos pos)
+        public IEnumerable<MoveBuilder> GetMoveBuilders(Game game, Pos pos)
         {
-            var moves = new List<AppliedMove>();
+            return NormalMove(game, pos);
+        }
+
+        public IEnumerable<MoveBuilder> NormalMove(Game game, Pos pos)
+        {
+            var moves = new List<MoveBuilder>();
             moves.AddRange(new Rook(Side).NormalMove(game, pos));
             moves.AddRange(new Bishop(Side).NormalMove(game, pos));
 

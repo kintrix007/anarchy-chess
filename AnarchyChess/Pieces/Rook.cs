@@ -19,9 +19,9 @@ namespace AnarchyChess.Pieces
             MoveCount = 0;
         }
 
-        public IEnumerable<AppliedMove> GetMoves(Game game, Pos pos)
+        public IEnumerable<MoveBuilder> GetMoveBuilders(Game game, Pos pos)
         {
-            return NormalMove(game, pos).Select(x => x.Build());
+            return NormalMove(game, pos);
         }
 
         public IEnumerable<MoveBuilder> NormalMove(Game game, Pos pos)

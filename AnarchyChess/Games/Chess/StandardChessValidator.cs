@@ -18,10 +18,14 @@ namespace AnarchyChess.Games.Chess
             return true;
         }
 
-        //TODO: Implement
         private static bool IsPossibleMove(Game game, AppliedMove move)
         {
-            throw new NotImplementedException();
+            //TODO: Make this nicer. As it stands, this sucks.
+            var pos = game.Board
+                .SelectNotNull(x => ReferenceEquals(x.piece, move.Piece) ? x.pos : null)
+                .First();
+            var moves = move.Piece.GetMoves(game, pos);
+            return moves.Contains(move);
         }
 
         public static bool ValidateBounds(Game game, AppliedMove move)
