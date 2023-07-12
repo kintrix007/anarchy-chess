@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnarchyChess", "AnarchyChess\AnarchyChess.csproj", "{D8595C33-2780-4BE1-BF93-45BE5362A20A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnarchyChess.Test", "AnarchyChess.Test\AnarchyChess.Test.csproj", "{90654B9D-0A15-4499-86C1-F2550C2C9AE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{D8595C33-2780-4BE1-BF93-45BE5362A20A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8595C33-2780-4BE1-BF93-45BE5362A20A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8595C33-2780-4BE1-BF93-45BE5362A20A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90654B9D-0A15-4499-86C1-F2550C2C9AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90654B9D-0A15-4499-86C1-F2550C2C9AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90654B9D-0A15-4499-86C1-F2550C2C9AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90654B9D-0A15-4499-86C1-F2550C2C9AE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
