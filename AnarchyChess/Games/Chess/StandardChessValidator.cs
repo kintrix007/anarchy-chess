@@ -1,4 +1,3 @@
-using System.Linq;
 using AnarchyChess.Moves;
 
 namespace AnarchyChess.Games.Chess
@@ -21,8 +20,8 @@ namespace AnarchyChess.Games.Chess
         private static bool IsPossibleMove(Game game, AppliedMove move)
         {
             //TODO: Make this nicer. As it stands, this sucks.
-            var pos = game.Board
-                .SelectNotNull(x => ReferenceEquals(x.piece, move.Piece) ? x.pos : null)
+            var pos = game.Board.Pieces()
+                .SelectNotNull(x => ReferenceEquals(x.piece, move.Piece) ? x.pos : null!)
                 .First();
             var moves = move.Piece.GetMoves(game, pos);
             return moves.Contains(move);

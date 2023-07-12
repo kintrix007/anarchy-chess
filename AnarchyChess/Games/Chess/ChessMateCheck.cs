@@ -38,7 +38,7 @@ namespace AnarchyChess.Games.Chess
         /// <returns>Whether the side is in check in the game</returns>
         public static bool IsCheck(Game game, Side side)
         {
-            foreach (var (pos, piece) in game.Board)
+            foreach (var (pos, piece) in game.Board.Pieces())
             {
                 if (piece.Side == side) continue;
 

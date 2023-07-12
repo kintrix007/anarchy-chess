@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using AnarchyChess.Boards;
 using AnarchyChess.Games.Chess;
 using AnarchyChess.Moves;
@@ -144,7 +140,7 @@ namespace AnarchyChess.Games
         public IEnumerable<AppliedMove> GetAllMoves(Side side)
         {
             var moves = new List<AppliedMove>();
-            foreach (var (pos, piece) in Board)
+            foreach (var (pos, piece) in Board.Pieces())
             {
                 if (piece.Side != side) continue;
                 moves.AddRange(piece.GetMoves(this, pos));

@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+
 using AnarchyChess.Moves;
 using AnarchyChess.PieceHelper;
 
@@ -10,11 +8,10 @@ namespace AnarchyChess.Boards
     /// <summary>
     /// Object to hold all the pieces on their corresponding position.
     /// </summary>
-    public class Board : IEnumerable<(Pos pos, IPiece piece)>
+    public class Board : IEnumerable<(Pos pos, IPiece? piece)>
     {
         private readonly IPiece?[,] _pieces;
 
-        //TODO Actually take these values into consideration after making them public.
         public readonly int Width;
         public readonly int Height;
 
@@ -22,6 +19,13 @@ namespace AnarchyChess.Boards
         {
             Width = 8;
             Height = 8;
+            _pieces = new IPiece[Width, Height];
+        }
+
+        public Board(int width, int height)
+        {
+            Width = width;
+            Height = height;
             _pieces = new IPiece[Width, Height];
         }
 
@@ -41,6 +45,11 @@ namespace AnarchyChess.Boards
         /// <param name="x">The x position to get the piece from</param>
         /// <param name="y">The y position to get the piece from</param>
         public IPiece? this[int x, int y] => this[new Pos(x, y)];
+
+        /// <summary>
+        /// Get an iterator over the the pieces that exist on the board.
+        /// </summary>
+        public IEnumerable<(Pos pos, IPiece piece)> Pieces() => new Pieces(this);
 
         /// <summary>
         /// Check if a position is in the bounds of this board.
@@ -79,7 +88,7 @@ namespace AnarchyChess.Boards
             if (this[pos] == null) throw new ArgumentException($"There is no piece to replace at {pos}");
             this[pos] = with;
         }
-        
+
         /// <summary>
         /// Apply a move that is already split into steps.<br />
         /// <br />
@@ -118,16 +127,16 @@ namespace AnarchyChess.Boards
             void PopPossible()
             {
                 var toRemove = new List<Pos>();
-                
+
                 foreach (var pair in tmpPositions.Where(pair => this[pair.Key] == null))
                 {
                     this[pair.Key] = pair.Value;
                     toRemove.Add(pair.Key);
                 }
-                
+
                 toRemove.ForEach(x => tmpPositions.Remove(x));
             }
-            
+
             foreach (var step in steps)
             {
                 var movingPiece = GetAt(step.From);
@@ -154,7 +163,7 @@ namespace AnarchyChess.Boards
         public Board Clone()
         {
             var boardClone = new Board();
-            foreach (var (pos, piece) in this)
+            foreach (var (pos, piece) in this.Pieces())
             {
                 var pieceCtor = piece.GetType().GetConstructor(new[] { typeof(Side) });
                 if (pieceCtor == null) throw new NullReferenceException();
@@ -168,7 +177,7 @@ namespace AnarchyChess.Boards
             return boardClone;
         }
 
-        public IEnumerator<(Pos, IPiece)> GetEnumerator()
+        public IEnumerator<(Pos, IPiece?)> GetEnumerator()
         {
             for (var y = 0; y < Height; y++)
             {
@@ -176,6 +185,24 @@ namespace AnarchyChess.Boards
                 {
                     var pos = new Pos(x, y);
                     var piece = this[pos];
+                    yield return (pos, piece);
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    record class Pieces(Board Board) : IEnumerable<(Pos pos, IPiece piece)>
+    {
+        public IEnumerator<(Pos, IPiece)> GetEnumerator()
+        {
+            for (var y = 0; y < Board.Height; y++)
+            {
+                for (var x = 0; x < Board.Width; x++)
+                {
+                    var pos = new Pos(x, y);
+                    var piece = Board[pos];
                     if (piece == null) continue;
                     yield return (pos, piece);
                 }
@@ -183,5 +210,27 @@ namespace AnarchyChess.Boards
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public static class EnumerableToBoard
+    {
+        public static Board ToBoard(this IEnumerable<IPiece?> iter, int width, int height)
+        {
+            var board = new Board(width, height);
+
+            var enumIter = iter
+                .Select((x, idx) => (idx, x));
+            foreach (var (idx, piece) in enumIter)
+            {
+                if (piece == null) continue;
+                var x = idx % width;
+                var y = idx / width;
+                if (y >= height) break;
+
+                board.AddPiece(new(x, y), piece);
+            }
+
+            return board;
+        }
     }
 }
